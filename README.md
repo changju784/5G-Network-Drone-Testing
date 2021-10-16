@@ -24,8 +24,8 @@ Additionally any company that doesn't have the ability to implement their own sa
   
   Build machine learning model to model 5G performance with drones
   
-      - Predict air performance based on ground performance
-      - Predict ground performance based on air performance
-      - Use GPS coordinates to build 3D map of network
+  - Predict air performance based on ground performance
+  - Predict ground performance based on air performance
+  - Use GPS coordinates to build 3D map of network
  
 ## Solution Concept
