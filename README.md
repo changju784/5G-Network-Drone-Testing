@@ -31,6 +31,7 @@ Additionally any company that doesn't have the ability to implement their own sa
 ## Solution Concept
 
 ![Image](solution_concept.png)
+
 **_Figure 1: Proposed solution system including hardware components for data collection and software components for database and model implementation_
 
 
