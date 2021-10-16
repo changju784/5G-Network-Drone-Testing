@@ -30,5 +30,5 @@ Additionally any company that doesn't have the ability to implement their own sa
  
 ## Solution Concept
 
-!{Image](solution_concept.png)
+![Image](solution_concept.png)
 
