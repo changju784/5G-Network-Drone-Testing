@@ -15,12 +15,12 @@ Additionally any company that doesn't have the ability to implement their own sa
 
 ## Scope and Features of the Project
 
-  Collect data used to model 5G network performance
+  Collect data used to model 5G network performance:
   
-      - Build hardware for data collection
-        - Sensors + processor
-        - Install hardware on a drone
-      - Store data in cloud database
+  - Build hardware for data collection
+  - Sensors + processor
+  - Install hardware on a drone
+  - Store data in cloud database
   
   Build machine learning model to model 5G performance with drones
   
