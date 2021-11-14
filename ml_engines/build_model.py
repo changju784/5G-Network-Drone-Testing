@@ -11,7 +11,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import const.const_path as cpath
 
-__all__ = ['build_dataset']
+__all__ = ['build_model']
 
 def model_regression(X, y, train_len, prediction):
     path = cpath.path
