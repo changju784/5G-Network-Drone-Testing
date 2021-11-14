@@ -20,21 +20,6 @@ from tensorflow.keras.models import load_model
 
 __all__ = ['train']
 
-def multivariate_data(dataset, target, start_idx, end_idx, history_size, target_size, step, single_step=False):
-    data = []
-    label = []
-    start_idx = start_idx + history_size
-    if end_idx is None:
-        end_idx = len(dataset) - target_size
-    for i in range(start_idx, end_idx):
-        indices = range(i - history_size, i, step)
-        data.append(dataset[indices])
-        if single_step:
-            label.append(target[i + target_size])
-        else:
-            label.append(target[i:i+target_size])
-    return np.array(data), np.array(label)
-
 def norm(x, t):
         return (x - t['mean']) / t['std']
 
@@ -81,7 +66,6 @@ def train(prediction):
     example_result = model.predict(example_batch)
     print(example_result)
 
-train('upload')
 
 def predict(data, predict):
     path = cpath.path
@@ -92,6 +76,13 @@ def predict(data, predict):
 
     pred_result = loaded_model.predict(data).flatten()
     return pred_result
+
+
+
+
+
+
+
 
     # def bm():
     #     model = keras.Sequential([
