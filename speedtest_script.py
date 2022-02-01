@@ -33,9 +33,18 @@ def test_speed():
     mydb.commit()
     mydb.close()
 
-test_speed()
+# test_speed()
 
 
+# import geocoder
+# g = geocoder.ip('me')
+# print(g.latlng)
+
+from ipregistry import IpregistryClient
+
+client = IpregistryClient("tryout")
+ipInfo = client.lookup()
+print(ipInfo)
 #try:
 #   t1 = threading.Thread(target = test_speed )
 #   t2 = threading.Thread(target = test_speed )

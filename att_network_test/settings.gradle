@@ -1,0 +1,2 @@
+rootProject.name = "att_network_test"
+include ':app'
