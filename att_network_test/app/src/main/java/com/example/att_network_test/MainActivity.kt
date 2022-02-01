@@ -4,8 +4,10 @@ import android.Manifest
 import android.app.ActivityOptions
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.os.IResultReceiver
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -19,11 +21,13 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.ookla.speedtest.sdk.SpeedtestSDK
 
 import kotlinx.android.synthetic.main.activity_main.*
-
-
+import kotlinx.coroutines.*
 
 
 class MainActivity : AppCompatActivity() {
+
+    private var isTestFinished: Boolean? = false
+    private var isFetchFinished: Boolean? = false
 
     companion object {
         // Use the key provided to you instead of the test key below
@@ -46,6 +50,28 @@ class MainActivity : AppCompatActivity() {
         actionList.adapter = arrayAdapter
         actionList.onItemClickListener = OnItemClickListener { _, _, position, _ ->
             startActivityWith(availableTests[position])
+        }
+
+        val shortTest = TestActivity.TestFunctionality.ShortTest
+        val fetchResult = TestActivity.TestFunctionality.FetchStoredResult
+        startTest.setOnClickListener { _ ->
+            suspend fun runShortTest() = coroutineScope{
+                startActivityWith(shortTest)
+            }
+            suspend fun getResult() = coroutineScope{
+                startActivityWith((fetchResult))
+            }
+            val first = GlobalScope.launch(Dispatchers.Default) {
+                runShortTest()
+            }
+            val second = GlobalScope.launch(Dispatchers.Default) {
+                getResult()
+            }
+            runBlocking {
+                first.join()
+                second.join()
+            }
+
         }
 
         foregroundSwitch.isChecked = SpeedtestSDK.getInstance().getSpeedtestSDKOptions().foregroundServiceOption.enabled
@@ -110,7 +136,11 @@ class MainActivity : AppCompatActivity() {
             p0: MutableList<PermissionRequest>?,
             p1: PermissionToken?
         ) {
-            Toast.makeText(this@MainActivity,"Please enable background location from settings page", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                this@MainActivity,
+                "Please enable background location from settings page",
+                Toast.LENGTH_SHORT
+            ).show();
         }
 
     }

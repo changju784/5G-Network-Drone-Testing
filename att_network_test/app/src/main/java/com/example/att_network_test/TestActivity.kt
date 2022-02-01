@@ -81,6 +81,7 @@ class TestActivity : AppCompatActivity() {
         when (testFunctionality) {
             TestFunctionality.SingleTest -> {
                 runSingleTest(inst)
+
             }
             TestFunctionality.ShortTest -> {
                 runShortTest(inst)
@@ -146,6 +147,7 @@ class TestActivity : AppCompatActivity() {
                 output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
                 taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
                 taskManager?.start()
+//                taskManager?.
             }
 
             override fun onConfigFetchFailed(error: OoklaError) {
@@ -179,6 +181,7 @@ class TestActivity : AppCompatActivity() {
             }
         }
         ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
+
     }
 
     private fun runShortTest(speedtestSDK: SpeedtestSDK) {
@@ -310,6 +313,7 @@ class TestActivity : AppCompatActivity() {
             override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
 
                 if (testFinished) {
+
                     return
                 }
                 val handlerWithStageProgression =
