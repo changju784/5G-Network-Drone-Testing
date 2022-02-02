@@ -9,6 +9,8 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.dandan.jsonhandleview.library.JsonViewLayout
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.ookla.speedtest.sdk.*
 import com.ookla.speedtest.sdk.config.*
 import com.ookla.speedtest.sdk.handler.MainThreadTestHandler
@@ -33,6 +35,8 @@ class TestActivity : AppCompatActivity() {
     private val testConfigBgScan = "defaultSignalScan"
     private val testConfigCITest = "5gnetworktest"
 
+    private val db = Firebase.firestore
+
     enum class TestFunctionality(val title: String) {
         ServerSelection("Run Server Selection"),
         SingleTest("Start Single Test"),
@@ -51,10 +55,14 @@ class TestActivity : AppCompatActivity() {
     private var wakeLock : PowerManager.WakeLock? = null
     private var wifiLock : WifiManager.WifiLock? = null
     private var taskManager: TaskManager? = null
+
+
+
     private var uploadSpeed: Double?= 0.0
     private var downloadSpeed: Double?= 0.0
     private var latitude: Double?= 0.0
     private var longitude: Double? = 0.0
+
 
     private var testFinished: Boolean = false
 
@@ -94,6 +102,7 @@ class TestActivity : AppCompatActivity() {
         }
     }
 
+
     private fun runFetchStoredResult(speedtestSDK: SpeedtestSDK) {
         val guid = MainActivity.lastTestGuid
         val logger = LoggingTestHandler(output, jsonView)
@@ -111,9 +120,22 @@ class TestActivity : AppCompatActivity() {
                     downloadSpeed = result.downloadMbps
                     latitude = ((result.endLatitude + result.startLatitude) /2).toDouble()
                     longitude = ((result.endLongitude + result.startLongitude) /2).toDouble()
-                    logger.log(result.uploadMbps.toString())
-                    logger.log(result.downloadMbps.toString())
-                    println(uploadSpeed)
+
+                    val user = hashMapOf(
+                        "upload" to uploadSpeed,
+                        "download" to downloadSpeed,
+                        "latitude" to latitude,
+                        "longitude" to longitude
+                    )
+                    db.collection("users")
+                        .add(user)
+                        .addOnSuccessListener { documentReference ->
+                            println( "DocumentSnapshot added with ID: ${documentReference.id}")
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error adding document")
+                        }
+
 
                 } catch(exc: RuntimeException) {
                     logger.log("Failed to convert result to json: ${exc.localizedMessage}")

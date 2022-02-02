@@ -23,11 +23,16 @@ import com.ookla.speedtest.sdk.SpeedtestSDK
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+
 
 class MainActivity : AppCompatActivity() {
 
     private var isTestFinished: Boolean? = false
     private var isFetchFinished: Boolean? = false
+
+
 
     companion object {
         // Use the key provided to you instead of the test key below
@@ -46,6 +51,8 @@ class MainActivity : AppCompatActivity() {
         val arrayAdapter =
             ArrayAdapter(this, android.R.layout.simple_list_item_1,
                 availableTests.map { it.title }.toList())
+
+
 
         actionList.adapter = arrayAdapter
         actionList.onItemClickListener = OnItemClickListener { _, _, position, _ ->
@@ -70,7 +77,9 @@ class MainActivity : AppCompatActivity() {
             runBlocking {
                 first.join()
                 second.join()
+
             }
+
 
         }
 
