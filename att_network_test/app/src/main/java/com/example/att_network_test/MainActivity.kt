@@ -41,6 +41,10 @@ class MainActivity : AppCompatActivity() {
         var lastTestGuid: String? = null
     }
 
+//    Timer timer;
+//    TimerTask timerTask;
+//    final Handler handler = new Handler();
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -61,6 +65,16 @@ class MainActivity : AppCompatActivity() {
 
         val shortTest = TestActivity.TestFunctionality.ShortTest
         val fetchResult = TestActivity.TestFunctionality.FetchStoredResult
+
+//      startTimer();
+
+//        private fun initializeTimerTask() {
+//            timerTask = new TimerTask() {
+//                public void run() {
+//                    handler.post(new Runnable() {
+//                        public void run() {
+//                            //code to run after every 5 seconds
+
         startTest.setOnClickListener { _ ->
             suspend fun runShortTest() = coroutineScope{
                 startActivityWith(shortTest)
@@ -82,6 +96,56 @@ class MainActivity : AppCompatActivity() {
 
 
         }
+        /*
+
+            Timer timer;
+            TimerTask timerTask;
+            final Handler handler = new Handler();
+             @Override
+            private fun onCreate() {
+                super.onCreate();
+                startTimer();
+            }
+
+            public void startTimer() {
+                //set a new Timer
+                timer = new Timer();
+
+                //initialize the TimerTask's job
+                initializeTimerTask();
+
+                timer.schedule(timerTask, 0, 5000);
+            }
+
+            private fun initializeTimerTask() {
+                timerTask = new TimerTask() {
+                    public void run() {
+                        handler.post(new Runnable() {
+                            public void run() {
+                               //code to run after every 5 seconds
+                                 suspend fun runShortTest() = coroutineScope{
+                                        startActivityWith(shortTest)
+                                    }
+                                 suspend fun getResult() = coroutineScope{
+                                        startActivityWith((fetchResult))
+                                    }
+                                 val first = GlobalScope.launch(Dispatchers.Default) {
+                                        runShortTest()
+                                    }
+                                 val second = GlobalScope.launch(Dispatchers.Default) {
+                                        getResult()
+                                    }
+                                 runBlocking {
+                                        first.join()
+                                        second.join()
+
+            }
+                            }
+                        });
+                    }
+                };
+            }
+         */
 
         foregroundSwitch.isChecked = SpeedtestSDK.getInstance().getSpeedtestSDKOptions().foregroundServiceOption.enabled
         foregroundSwitch.setOnCheckedChangeListener { _, enabled ->
