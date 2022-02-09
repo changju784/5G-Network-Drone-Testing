@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang= "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content = "width=device-width, initial scale = 1.0">
+    <title> AT&T 5G Network Test</title>
+</head>
+<body>
+    <h1> AT&T 5G Network Test</h1>
+    <form action="/runTest/" method="post">
+        {% for message in get_flashed_messages() %}
+            <p> {{message}} </p>
+        {% endfor %}
+
+        <button name="startBtn" type="submit">Start</button>
+    </form>
+
+    <form action="/stopTest/" method="post">
+        <button name="startBtn" type="submit">Stop</button>
+    </form>
+
+    <form action="/MLmodel/" method="post"></form>
+        <button name ="navigateML" type = "submit">
+            <a href = "{{url_for('MLmodel')}}">
+            Here to visualize a prediction on a 5G network performance
+            </a>
+        </button>
+    </form>
+
+</body>
+</html>
