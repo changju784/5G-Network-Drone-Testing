@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.support.v4.os.IResultReceiver
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
@@ -29,7 +31,7 @@ import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
 
-    private var isTestFinished: Boolean? = false
+    private var runTest: Boolean? = false
     private var isFetchFinished: Boolean? = false
 
 
@@ -40,6 +42,10 @@ class MainActivity : AppCompatActivity() {
         const val SPEEDTEST_SDK_RESULT_KEY = "d7x47854dtlgwi31"
         var lastTestGuid: String? = null
     }
+
+//    Timer timer;
+//    TimerTask timerTask;
+//    final Handler handler = new Handler();
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,13 +67,23 @@ class MainActivity : AppCompatActivity() {
 
         val shortTest = TestActivity.TestFunctionality.ShortTest
         val fetchResult = TestActivity.TestFunctionality.FetchStoredResult
+
         startTest.setOnClickListener { _ ->
-            suspend fun runShortTest() = coroutineScope{
+            runTest = true
+        }
+
+
+
+        fun run() {
+            //Call your function here
+            suspend fun runShortTest() = coroutineScope {
                 startActivityWith(shortTest)
             }
-            suspend fun getResult() = coroutineScope{
+
+            suspend fun getResult() = coroutineScope {
                 startActivityWith((fetchResult))
             }
+
             val first = GlobalScope.launch(Dispatchers.Default) {
                 runShortTest()
             }
@@ -76,12 +92,33 @@ class MainActivity : AppCompatActivity() {
             }
             runBlocking {
                 first.join()
+                delay(1000)
                 second.join()
 
             }
-
-
         }
+
+        val scope= MainScope()
+        var job: Job? = null
+
+        fun stopUpdates(){
+            job?.cancel()
+            job = null
+        }
+
+        fun startUpdates() {
+            stopUpdates()
+            job = scope.launch{
+                while(true){
+                    run()
+                    delay(10000)
+                }
+            }
+        }
+
+        startUpdates()
+
+
 
         foregroundSwitch.isChecked = SpeedtestSDK.getInstance().getSpeedtestSDKOptions().foregroundServiceOption.enabled
         foregroundSwitch.setOnCheckedChangeListener { _, enabled ->
@@ -118,8 +155,8 @@ class MainActivity : AppCompatActivity() {
                 ).withListener(object : MultiplePermissionsListener {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                         if (true == report?.deniedPermissionResponses?.any {
-                            it.permissionName == Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        }) {
+                                it.permissionName == Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            }) {
                             Dexter.withContext(this@MainActivity)
                                 .withPermissions(
                                     Manifest.permission.ACCESS_BACKGROUND_LOCATION

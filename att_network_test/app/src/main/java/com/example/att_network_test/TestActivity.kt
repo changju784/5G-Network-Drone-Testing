@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.PowerManager
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.WindowManager
 import android.widget.TextView
@@ -21,6 +23,8 @@ import com.ookla.speedtest.sdk.model.TransferResult
 import com.ookla.speedtest.sdk.result.OoklaError
 
 import kotlinx.android.synthetic.main.activity_test.*
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 import java.lang.RuntimeException
 
@@ -223,6 +227,15 @@ class TestActivity : AppCompatActivity() {
                 )
                 taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
                 taskManager?.start()
+
+                // delay 10 seconds
+                val handler1 = Handler()
+                handler1.postDelayed(object : Runnable {
+                    override fun run() {
+                        onBackPressed()
+                    }
+                }, 15000)
+
 
             }
 
