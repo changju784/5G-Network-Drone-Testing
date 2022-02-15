@@ -68,6 +68,18 @@ class MainActivity : AppCompatActivity() {
         val shortTest = TestActivity.TestFunctionality.ShortTest
         val fetchResult = TestActivity.TestFunctionality.FetchStoredResult
 
+<<<<<<< HEAD
+=======
+//      startTimer();
+
+//        private fun initializeTimerTask() {
+//            timerTask = new TimerTask() {
+//                public void run() {
+//                    handler.post(new Runnable() {
+//                        public void run() {
+//                            //code to run after every 5 seconds
+
+>>>>>>> 12304ab9b37208c29843e5bc6cd9ca13cfc0f9e2
         startTest.setOnClickListener { _ ->
             runTest = true
         }
@@ -115,6 +127,56 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        /*
+
+            Timer timer;
+            TimerTask timerTask;
+            final Handler handler = new Handler();
+             @Override
+            private fun onCreate() {
+                super.onCreate();
+                startTimer();
+            }
+
+            public void startTimer() {
+                //set a new Timer
+                timer = new Timer();
+
+                //initialize the TimerTask's job
+                initializeTimerTask();
+
+                timer.schedule(timerTask, 0, 5000);
+            }
+
+            private fun initializeTimerTask() {
+                timerTask = new TimerTask() {
+                    public void run() {
+                        handler.post(new Runnable() {
+                            public void run() {
+                               //code to run after every 5 seconds
+                                 suspend fun runShortTest() = coroutineScope{
+                                        startActivityWith(shortTest)
+                                    }
+                                 suspend fun getResult() = coroutineScope{
+                                        startActivityWith((fetchResult))
+                                    }
+                                 val first = GlobalScope.launch(Dispatchers.Default) {
+                                        runShortTest()
+                                    }
+                                 val second = GlobalScope.launch(Dispatchers.Default) {
+                                        getResult()
+                                    }
+                                 runBlocking {
+                                        first.join()
+                                        second.join()
+
+            }
+                            }
+                        });
+                    }
+                };
+            }
+         */
 
         startUpdates()
 
