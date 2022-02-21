@@ -42,18 +42,9 @@ class TestActivity : AppCompatActivity() {
     private val db = Firebase.firestore
 
     enum class TestFunctionality(val title: String) {
-        ServerSelection("Run Server Selection"),
         SingleTest("Start Single Test"),
-        SingleTestWithAutoServerSelection("Start Test With Auto Server Selection"),
         ShortTest("Start Short Test"),
-        BackgroundCaptureDeviceTask("Start Background Scan"),
-        BackgroundThroughputTask("Start Background Speedtest"),
-        Traceroute("Run Multiple Traceroutes"),
-        UploadAndTraceroute("Run Upload and Traceroute Test"),
-        TestWithSupplementalData("Test With Supplemental Data"),
         FetchStoredResult("Fetch Stored Test Result"),
-        DeleteSavedConfigs("Remove Saved Config"),
-        ReinitSDK("Reinitialize SDK")
     }
 
     private var wakeLock : PowerManager.WakeLock? = null
@@ -66,6 +57,7 @@ class TestActivity : AppCompatActivity() {
     private var downloadSpeed: Double?= 0.0
     private var latitude: Double?= 0.0
     private var longitude: Double? = 0.0
+
 
 
     private var testFinished: Boolean = false
@@ -106,13 +98,16 @@ class TestActivity : AppCompatActivity() {
         }
     }
 
-
     private fun runFetchStoredResult(speedtestSDK: SpeedtestSDK) {
         val guid = MainActivity.lastTestGuid
         val logger = LoggingTestHandler(output, jsonView)
+
         if(guid == null) {
             logger.log("A test needs to be run first to fetch the stored result.")
             return
+        }
+        if (guid != null) {
+            logger.log(guid)
         }
         logger.log("Fetching stored result for guid $guid...")
         speedtestSDK.fetchResult(guid, MainActivity.SPEEDTEST_SDK_RESULT_KEY) { result, error ->
@@ -140,7 +135,6 @@ class TestActivity : AppCompatActivity() {
                             println("Error adding document")
                         }
 
-
                 } catch(exc: RuntimeException) {
                     logger.log("Failed to convert result to json: ${exc.localizedMessage}")
                 }
@@ -148,6 +142,7 @@ class TestActivity : AppCompatActivity() {
                 logger.log("Failed to fetch result: ${error.message} (${error.type})")
             }
         }
+
 
     }
 
@@ -159,7 +154,8 @@ class TestActivity : AppCompatActivity() {
         val configHandler = object : ConfigHandlerBase() {
             override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
                 if (testFinished) {
-                    return;
+                    runFetchStoredResult(speedtestSDK)
+//                    return;
                 }
 
                 val handlerWithStageProgression =
@@ -173,7 +169,6 @@ class TestActivity : AppCompatActivity() {
                 output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
                 taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
                 taskManager?.start()
-//                taskManager?.
             }
 
             override fun onConfigFetchFailed(error: OoklaError) {
@@ -184,31 +179,6 @@ class TestActivity : AppCompatActivity() {
         ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
     }
 
-    private fun runSingleTestWithAutoServerSelection(speedtestSDK: SpeedtestSDK) {
-        val config = Config.newConfig(testConfigCITest)
-        val configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-                if (testFinished) {
-                    return;
-                }
-                val handlerWithStageProgression =
-                    UiTestHandlerWithStageProgression(
-                        output, jsonView
-                    )
-                val handler = MainThreadTestHandler(
-                    handlerWithStageProgression
-                )
-                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
-                taskManager?.start()
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-
-    }
 
     private fun runShortTest(speedtestSDK: SpeedtestSDK) {
         val config = Config.newConfig(testConfigCITest)
@@ -228,13 +198,6 @@ class TestActivity : AppCompatActivity() {
                 taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
                 taskManager?.start()
 
-                // delay 10 seconds
-                val handler1 = Handler()
-                handler1.postDelayed(object : Runnable {
-                    override fun run() {
-                        onBackPressed()
-                    }
-                }, 15000)
 
 
             }
@@ -246,211 +209,6 @@ class TestActivity : AppCompatActivity() {
         ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
     }
 
-    private fun runServerSelection() {
-        val config = Config.newConfig(testConfigCITest)
-        val configHandler: ConfigHandler
-        configHandler = MainThreadConfigHandler(LoggingConfigHandler(output))
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
-
-    private fun runTestWithUploadAndTraceroute(speedtestSDK: SpeedtestSDK) {
-        val config = Config.newConfig(testConfigCITest)
-        config?.tasks = arrayListOf(Task.newCustomThroughputTask(hashSetOf(ThroughputStage.UPLOAD)),
-            Task.newServerTracerouteTask())
-        val configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-                if (testFinished) {
-                    return;
-                }
-                val handlerWithStageProgression =
-                    UiTestHandlerWithStageProgression(output, jsonView)
-                val handler = MainThreadTestHandler(handlerWithStageProgression)
-                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
-                taskManager?.start()
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
-
-    private fun runTestWithTraceroute(speedtestSDK: SpeedtestSDK) {
-        val config = Config.newConfig(testConfigCITest)
-        val configHandler: ConfigHandler
-        config?.tasks = arrayListOf(Task.newTracerouteTask("www.speedtest.com"),
-            Task.newTracerouteTask("www.ookla.com"),
-            Task.newServerTracerouteTask(),
-            Task.newTimeoutTask(5)
-        )
-        config?.disableResultUpload = true
-        configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-                if (testFinished) {
-                    return;
-                }
-                val handlerWithStageProgression =
-                    UiTestHandlerWithStageProgression(output, jsonView)
-                val handler = MainThreadTestHandler(handlerWithStageProgression)
-                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
-                taskManager?.start()
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
-
-    private fun runTestWithSupplementalData(speedtestSDK: SpeedtestSDK) {
-        val config = Config.newConfig(testConfigCITest)
-        val configHandler: ConfigHandler
-        configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-                if (testFinished) {
-                    return;
-                }
-                val handlerWithStageProgression =
-                    UiTestHandlerWithStageProgression(
-                        output, jsonView
-                    )
-                val handler = MainThreadTestHandler(
-                    handlerWithStageProgression
-                )
-
-                val extraFields = arrayListOf(DataPairs("field", "8918"), DataPairs("otherField", "value"));
-
-                val supplementalData = SupplementalData("1128", "1.0.10", extraFields);
-                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
-                taskManager?.setSupplementalData(supplementalData.toJson().toByteArray())
-                taskManager?.start()
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
-
-    private fun runBackgroundCaptureDeviceTask(speedtestSDK: SpeedtestSDK) {
-        val data = SupplementalData("123", "1.0", arrayListOf())
-        val config = Config.newConfig(testConfigBgScan)
-
-        // background
-        config?.tasks = arrayListOf(Task.newCaptureDeviceStateTask())
-
-        var backgroundScanTaskManager : TaskManager?
-        val configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-
-                if (testFinished) {
-
-                    return
-                }
-                val handlerWithStageProgression =
-                    UiTestHandlerWithStageProgression(
-                        output, jsonView
-                    )
-                val handler = MainThreadTestHandler(
-                    handlerWithStageProgression
-                )
-
-                output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
-                val backgroundScanTaskManagerStatus = speedtestSDK.newTaskManagerWithCreateStatus(handler, validatedConfig)
-                backgroundScanTaskManager = backgroundScanTaskManagerStatus.taskManager
-                backgroundScanTaskManager?.setSupplementalData(data.toJson().toByteArray())
-
-                if (backgroundScanTaskManagerStatus.didExist()) {
-                    output.append("Background task is already running.\n")
-                    logLastRunTime(speedtestSDK, testConfigBgScan)
-                } else {
-                    backgroundScanTaskManager?.start()
-                    output.append("Started background task.\n");
-                }
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
-
-    private fun runBackgroundThroughputTask(speedtestSDK: SpeedtestSDK) {
-        val config = Config.newConfig(testConfigBgSpeed)
-
-        // background
-        config?.tasks = arrayListOf(Task.newThroughputTask())
-
-        var backgroundThroughputTaskManager : TaskManager?
-        val configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-                if (testFinished) {
-                    return;
-                }
-                val handler = MainThreadTestHandler(
-                    LoggingTestHandler(output, jsonView)
-                )
-
-                output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
-
-                val backgroundThroughputTaskManagerStatus = speedtestSDK.newTaskManagerWithAutoAdvance(handler, validatedConfig)
-                backgroundThroughputTaskManager = backgroundThroughputTaskManagerStatus.taskManager
-
-                if (backgroundThroughputTaskManagerStatus.didExist()) {
-                    output.append("Background task is already running.\n")
-                    logLastRunTime(speedtestSDK, testConfigBgScan)
-                } else {
-                    backgroundThroughputTaskManager?.start()
-                    output.append("Started background task.\n");
-                }
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
-
-    private fun logLastRunTime(speedtestSDK: SpeedtestSDK, name: String) {
-        val config = speedtestSDK.configManager
-        config.getNamedConfig(name)?.let {
-            output.append("\nLast ran at ${it.lastRunTime}\n\n")
-        }
-    }
-
-    private fun deleteNamedConfigs(speedtestSDK: SpeedtestSDK) {
-        val config = speedtestSDK.configManager
-        val configs = config.savedConfigs
-        configs.forEach {
-            output.append("Found saved config ${it.name}\n")
-            output.append("Deleting saved config ${it.name}\n")
-            config.removeSavedConfig(it.name)
-        }
-
-        val configsAfterRemoval = config.savedConfigs
-        if (configsAfterRemoval.size == 0) {
-            output.append("No saved configs found!\n")
-        } else {
-            configs.forEach {
-                output.append("Found saved config ${it.name}\n")
-            }
-        }
-    }
-
-    private fun reinitSDK(speedtestSDK: SpeedtestSDK) {
-        speedtestSDK.terminate()
-        SpeedtestSDK.initSDK(application, MainActivity.SPEEDTEST_SDK_API_KEY)
-
-        runShortTest(speedtestSDK)
-    }
 
     override fun onBackPressed() {
         testFinished = true;
@@ -476,6 +234,7 @@ class TestActivity : AppCompatActivity() {
         }
     }
 
+
     inner class UiTestHandlerWithStageProgression (output: TextView, jsonView: JsonViewLayout) : LoggingTestHandler(output, jsonView) {
         override fun onLatencyFinished(taskController: TaskManagerController?, result: LatencyResult) {
             super.onLatencyFinished(taskController, result)
@@ -485,6 +244,38 @@ class TestActivity : AppCompatActivity() {
         override fun onDownloadFinished(taskController: TaskManagerController?, result: TransferResult) {
             super.onDownloadFinished(taskController, result)
             taskManager?.startNextStage()
+        }
+
+        override fun onTestFinished(speedtestResult: SpeedtestResult) {
+            super.onTestFinished(speedtestResult)
+            val logger = LoggingTestHandler(output, jsonView)
+
+            val resultObj = speedtestResult.resultObj
+            MainActivity.lastTestGuid = resultObj.guid
+            logger.log(resultObj.download?.speedKbps.toString())
+            logger.log(resultObj.upload?.client?.speedKbps.toString())
+            uploadSpeed = resultObj.upload?.client?.speedKbps?.toDouble()
+            downloadSpeed = resultObj.download?.speedKbps?.toDouble()
+
+            val data = hashMapOf(
+                "upload" to uploadSpeed,
+                "download" to downloadSpeed,
+                "latitude" to MainActivity.latitude,
+                "longitude" to MainActivity.longitude,
+                "altitude" to MainActivity.altitude
+            )
+            db.collection("data")
+                .add(data)
+                .addOnSuccessListener { documentReference ->
+                    println( "DocumentSnapshot added with ID: ${documentReference.id}")
+                }
+                .addOnFailureListener { e ->
+                    println("Error adding document")
+                }
+
+            onBackPressed()
+
+
         }
     }
 

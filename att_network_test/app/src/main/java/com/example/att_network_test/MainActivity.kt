@@ -2,19 +2,23 @@ package com.example.att_network_test
 
 import android.Manifest
 import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.AsyncTask
-import android.os.Build
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.provider.Settings
 import android.support.v4.os.IResultReceiver
+import android.util.Log
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.*
+import com.google.firebase.firestore.FirebaseFirestore
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -27,12 +31,16 @@ import kotlinx.coroutines.*
 
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.activity_test.*
+import java.lang.RuntimeException
 
 
 class MainActivity : AppCompatActivity() {
 
     private var runTest: Boolean? = false
-    private var isFetchFinished: Boolean? = false
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    private val db = Firebase.firestore
 
 
 
@@ -41,23 +49,27 @@ class MainActivity : AppCompatActivity() {
         const val SPEEDTEST_SDK_API_KEY = "o7htwvpp3tycrei1"
         const val SPEEDTEST_SDK_RESULT_KEY = "d7x47854dtlgwi31"
         var lastTestGuid: String? = null
+        private const val PERMISSION_ID = 100
+        var longitude: Double?= 0.0
+        var latitude: Double?=0.0
+        var altitude: Double?=0.0
     }
 
-//    Timer timer;
-//    TimerTask timerTask;
-//    final Handler handler = new Handler();
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        fusedLocationProviderClient=LocationServices.getFusedLocationProviderClient(this)
+
+
         checkPermissions()
+
 
         val availableTests = TestActivity.TestFunctionality.values()
         val arrayAdapter =
             ArrayAdapter(this, android.R.layout.simple_list_item_1,
                 availableTests.map { it.title }.toList())
-
 
 
         actionList.adapter = arrayAdapter
@@ -66,23 +78,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val shortTest = TestActivity.TestFunctionality.ShortTest
-        val fetchResult = TestActivity.TestFunctionality.FetchStoredResult
-
-<<<<<<< HEAD
-=======
-//      startTimer();
-
-//        private fun initializeTimerTask() {
-//            timerTask = new TimerTask() {
-//                public void run() {
-//                    handler.post(new Runnable() {
-//                        public void run() {
-//                            //code to run after every 5 seconds
-
->>>>>>> 12304ab9b37208c29843e5bc6cd9ca13cfc0f9e2
-        startTest.setOnClickListener { _ ->
-            runTest = true
-        }
 
 
 
@@ -93,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             suspend fun getResult() = coroutineScope {
-                startActivityWith((fetchResult))
+                getCurrentLocation()
             }
 
             val first = GlobalScope.launch(Dispatchers.Default) {
@@ -104,7 +99,6 @@ class MainActivity : AppCompatActivity() {
             }
             runBlocking {
                 first.join()
-                delay(1000)
                 second.join()
 
             }
@@ -123,62 +117,47 @@ class MainActivity : AppCompatActivity() {
             job = scope.launch{
                 while(true){
                     run()
-                    delay(10000)
+                    delay(20000)
                 }
             }
         }
-        /*
 
-            Timer timer;
-            TimerTask timerTask;
-            final Handler handler = new Handler();
-             @Override
-            private fun onCreate() {
-                super.onCreate();
-                startTimer();
-            }
+        fun listenOnOperation() {
+            val docRef = db.collection("operations").document("operate")
+            docRef.addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Toast.makeText(this,"Failed",Toast.LENGTH_LONG).show()
+                    return@addSnapshotListener
+                }
 
-            public void startTimer() {
-                //set a new Timer
-                timer = new Timer();
-
-                //initialize the TimerTask's job
-                initializeTimerTask();
-
-                timer.schedule(timerTask, 0, 5000);
-            }
-
-            private fun initializeTimerTask() {
-                timerTask = new TimerTask() {
-                    public void run() {
-                        handler.post(new Runnable() {
-                            public void run() {
-                               //code to run after every 5 seconds
-                                 suspend fun runShortTest() = coroutineScope{
-                                        startActivityWith(shortTest)
-                                    }
-                                 suspend fun getResult() = coroutineScope{
-                                        startActivityWith((fetchResult))
-                                    }
-                                 val first = GlobalScope.launch(Dispatchers.Default) {
-                                        runShortTest()
-                                    }
-                                 val second = GlobalScope.launch(Dispatchers.Default) {
-                                        getResult()
-                                    }
-                                 runBlocking {
-                                        first.join()
-                                        second.join()
-
-            }
-                            }
-                        });
+                if (snapshot != null && snapshot.exists()) {
+                    Toast.makeText(this, snapshot.data?.get("test").toString(),Toast.LENGTH_LONG).show()
+                    runTest = snapshot.data?.get("test") as Boolean?
+                    if (runTest == true){
+                        startUpdates()
                     }
-                };
+                    if (runTest == false){
+                        stopUpdates()
+                    }
+                } else {
+                }
             }
-         */
+        }
+        listenOnOperation()
 
-        startUpdates()
+
+
+        startTest.setOnClickListener { _ ->
+            startUpdates()
+            Toast.makeText(this,"Start the Auto Test Run",Toast.LENGTH_LONG).show()
+        }
+
+        stopTest.setOnClickListener { _ ->
+            stopUpdates()
+            Toast.makeText(this,"Stopped the Test Run",Toast.LENGTH_LONG).show()
+        }
+
+
 
 
 
@@ -199,6 +178,75 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getCurrentLocation(){
+        if (checkPermission()){
+            if (isLocationEnabled()){
+                fusedLocationProviderClient.lastLocation.addOnCompleteListener(this){task->
+                    val location:Location?= task.result
+                    if (location == null){
+                        Toast.makeText(this,"NULL Received",Toast.LENGTH_SHORT).show()
+                    }
+                    else{
+                        latitude = location.latitude
+                        longitude = location.longitude
+                        altitude = location.altitude
+                        Toast.makeText(this,"Longitude: "+longitude.toString()
+                            + "\n Latitude: "+ latitude.toString()
+                                + "\n Altitude: " + altitude.toString(),Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+            else{
+                Toast.makeText(this,"Turn on Location",Toast.LENGTH_SHORT).show()
+                val intent = Intent(Settings.ACTION_LOCALE_SETTINGS)
+                startActivity(intent)
+            }
+        }
+        else{
+            requestPermission()
+        }
+    }
+    private fun checkPermission():Boolean{
+        if(
+            ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ){
+            return true
+        }
+
+        return false
+    }
+
+    private fun requestPermission(){
+        //this function will allows us to tell the user to requesut the necessary permsiion if they are not garented
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION,android.Manifest.permission.ACCESS_FINE_LOCATION),
+            PERMISSION_ID
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == PERMISSION_ID){
+            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Log.d("Debug:","You have the Permission")
+            }
+        }
+    }
+
+
+    private fun isLocationEnabled():Boolean{
+        //this function will return to us the state of the location service
+        //if the gps or the network provider is enabled then it will return true otherwise it will return false
+        var locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    }
+
     private fun startActivityWith(functionality: TestActivity.TestFunctionality) {
         val intent = Intent(applicationContext, TestActivity::class.java)
         intent.putExtra("testFunctionality", functionality)
@@ -208,7 +256,8 @@ class MainActivity : AppCompatActivity() {
         this@MainActivity.startActivity(intent, options.toBundle())
     }
 
-    private fun checkPermissions() {
+
+    private fun checkPermissions(){
         var permissionsNeeded = SpeedtestSDK.getInstance().checkPermissions(applicationContext)
         if (permissionsNeeded.isNotEmpty()) {
             Dexter.withContext(this)
@@ -236,6 +285,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     val multiplePermissionsListener = object: MultiplePermissionsListener {
         override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
         }
@@ -252,4 +303,5 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
 }
