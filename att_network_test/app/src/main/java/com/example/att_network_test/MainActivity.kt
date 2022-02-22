@@ -2,6 +2,7 @@ package com.example.att_network_test
 
 import android.Manifest
 import android.app.ActivityOptions
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -56,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -65,7 +68,6 @@ class MainActivity : AppCompatActivity() {
 
         checkPermissions()
 
-
         val availableTests = TestActivity.TestFunctionality.values()
         val arrayAdapter =
             ArrayAdapter(this, android.R.layout.simple_list_item_1,
@@ -74,6 +76,7 @@ class MainActivity : AppCompatActivity() {
 
         actionList.adapter = arrayAdapter
         actionList.onItemClickListener = OnItemClickListener { _, _, position, _ ->
+            getCurrentLocation()
             startActivityWith(availableTests[position])
         }
 
@@ -303,5 +306,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
 
 }

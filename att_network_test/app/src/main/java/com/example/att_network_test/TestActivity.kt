@@ -1,5 +1,6 @@
 package com.example.att_network_test
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.dandan.jsonhandleview.library.JsonViewLayout
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.ookla.speedtest.sdk.*
@@ -40,8 +42,6 @@ class TestActivity : AppCompatActivity() {
     private val testConfigCITest = "5gnetworktest"
 
     private val db = Firebase.firestore
-    private lateinit var database: DatabaseReference
-    database = Firebase.database.reference
 
     enum class TestFunctionality(val title: String) {
         SingleTest("Start Single Test"),
@@ -57,8 +57,6 @@ class TestActivity : AppCompatActivity() {
 
     private var uploadSpeed: Double?= 0.0
     private var downloadSpeed: Double?= 0.0
-    private var latitude: Double?= 0.0
-    private var longitude: Double? = 0.0
 
 
 
@@ -117,26 +115,6 @@ class TestActivity : AppCompatActivity() {
                 logger.log("Got result")
                 try {
                     jsonView.bindJson(result.toJson())
-                    uploadSpeed = result.uploadMbps
-                    downloadSpeed = result.downloadMbps
-                    latitude = ((result.endLatitude + result.startLatitude) /2).toDouble()
-                    longitude = ((result.endLongitude + result.startLongitude) /2).toDouble()
-
-                    val user = hashMapOf(
-                        "upload" to uploadSpeed,
-                        "download" to downloadSpeed,
-                        "latitude" to latitude,
-                        "longitude" to longitude
-                    )
-                    db.collection("users")
-                        .add(user)
-                        .addOnSuccessListener { documentReference ->
-                            println( "DocumentSnapshot added with ID: ${documentReference.id}")
-                        }
-                        .addOnFailureListener { e ->
-                            println("Error adding document")
-                        }
-                    database.child("users").child(userId).child("username").setValue(name)
 
                 } catch(exc: RuntimeException) {
                     logger.log("Failed to convert result to json: ${exc.localizedMessage}")
@@ -265,7 +243,8 @@ class TestActivity : AppCompatActivity() {
                 "download" to downloadSpeed,
                 "latitude" to MainActivity.latitude,
                 "longitude" to MainActivity.longitude,
-                "altitude" to MainActivity.altitude
+                "altitude" to MainActivity.altitude,
+                "time_stamp" to FieldValue.serverTimestamp()
             )
             db.collection("data")
                 .add(data)
@@ -275,6 +254,10 @@ class TestActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     println("Error adding document")
                 }
+            db.collection("operations").document("newest")
+                .set(data)
+                .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully written!") }
+                .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
 
             onBackPressed()
 

@@ -60,6 +60,11 @@
         android:id="@+id/startTest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Network Test" />
+        android:text="Start Auto Run" />
+    <Button
+        android:id="@+id/stopTest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Stop Auto Run" />
 
 </LinearLayout>
