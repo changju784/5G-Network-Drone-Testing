@@ -40,6 +40,8 @@ class TestActivity : AppCompatActivity() {
     private val testConfigCITest = "5gnetworktest"
 
     private val db = Firebase.firestore
+    private lateinit var database: DatabaseReference
+    database = Firebase.database.reference
 
     enum class TestFunctionality(val title: String) {
         SingleTest("Start Single Test"),
@@ -134,6 +136,7 @@ class TestActivity : AppCompatActivity() {
                         .addOnFailureListener { e ->
                             println("Error adding document")
                         }
+                    database.child("users").child(userId).child("username").setValue(name)
 
                 } catch(exc: RuntimeException) {
                     logger.log("Failed to convert result to json: ${exc.localizedMessage}")
