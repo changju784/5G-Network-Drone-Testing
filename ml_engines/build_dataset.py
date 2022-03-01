@@ -17,23 +17,33 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 __all__ = ['build_dataset']
-def get_data():
 
-    result = []
-    docs = db.collection('data').stream()
+class BuildData:
 
-    for doc in docs:
-#        print(doc.get('download'))
-        result.append(
-        (doc.id, \
-        doc.get('download'), \
-        doc.get('upload'), \
-        doc.get('latitude'), \
-        doc.get('longitude'), \
-        doc.get('altitude') ))
+    @classmethod
+    def __getInstance(cls):
+        return cls.__instance
 
-    df = pd.DataFrame(result)
-    df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude','altitude']
+    @classmethod
+    def instance(cls, *args, **kargs):
+        cls.__instance = cls(*args, **kargs)
+        cls.instance = cls.__getInstance
+        return cls.__instance
 
-    return df
+    def get_data(self):
+        result = []
+        docs = db.collection('data').stream()
 
+        for doc in docs:
+            result.append(
+            (doc.id, \
+            doc.get('download'), \
+            doc.get('upload'), \
+            doc.get('latitude'), \
+            doc.get('longitude'), \
+            doc.get('altitude'), \
+            doc.get('time_stamp')))
+
+        df = pd.DataFrame(result)
+        df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude','altitude', 'time_stamp']
+        return df
