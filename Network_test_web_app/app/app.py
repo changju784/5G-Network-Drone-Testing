@@ -1,40 +1,85 @@
-from flask import Flask, render_template, flash
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+from flask import Flask, render_template, flash, jsonify, request
 import os
+import sys
+
+from src.database import Database
+from src.ml_engines.model_regression import Modeling
 
 
 app = Flask(__name__)
 app.secret_key = "gkfxqywlehgnsgkskeh"
 
-data = os.path.abspath(os.path.dirname(__file__)) + "/src/serviceAccountKey.json"
-cred = credentials.Certificate(data)
-firebase_admin.initialize_app(cred)
 
-db = firestore.client()
-
+database = Database()
+ml = Modeling()
 
 @app.route("/")
 def index():
     return render_template("home.html")
 
 
-@app.route("/runTest/", methods=['POST'])
+@app.route("/runTest/", methods=['POST','GET'])
 def start():
-    db.collection('operations').document('operate').set({'test': True})
+    database.db.collection('operations').document('operate').set({'test': True})
     flash("Test Running")
-    return render_template('home.html')
-    # return render_template('home.html', forward_message=forward_message);
+
+    doc_ref = database.db.collection('operations').document('newest')
+    doc_watch = doc_ref.on_snapshot(database.on_snapshot)
+
+    return render_template('home.html', \
+        upload = database.upload,
+        download = database.download,
+        longitude= database.longitude,
+        latitude = database.latitude,
+        altitude = database.altitude)
 
 @app.route("/stopTest/", methods = ['POST'])
 def stop():
-    db.collection('operations').document('operate').set({'test':False})
+    database.db.collection('operations').document('operate').set({'test':False})
     return render_template('home.html')
 
-@app.route("/MLmodel")
-def MLmodel():
+@app.route('/update_recent', methods = ['POST'])
+def update_recent():
+
+    return jsonify('',render_template('recent_data.html', \
+        upload = database.upload,
+        download = database.download,
+        longitude= database.longitude,
+        latitude = database.latitude,
+        altitude = database.altitude))
+
+
+@app.route("/mlmodel")
+def mlmodel():
     return render_template("ml.html")
+
+@app.route("/mlmodel/build", methods = ['POST'])
+def build_and_train():
+    accuracy = ml.train()
+    flash("The model accuracy is " + str(accuracy))
+    return render_template("ml.html")
+
+@app.route("/mlmodel/predict", methods = ['POST'])
+def predict():
+    #function predict should take input from the user
+    try:
+        longitude = float(request.form["longitude"])
+        latitude = float(request.form["latitude"])
+        altitude = float(request.form["altitude"])
+    except:
+        flash("please enter all the input fields correctly")
+        return render_template("ml.html")
+        
+    prediction = ml.predict(longitude,latitude,altitude)
+    try:
+        prediction = ml.predict(longitude,latitude,altitude)
+    except:
+        flash("Please train the model before prediction")
+        return render_template("ml.html")
+
+    flash("The predictions is : " + "  ".join(prediction) )
+    return render_template("ml.html")
+    
 
 
 if __name__ == "__main__":

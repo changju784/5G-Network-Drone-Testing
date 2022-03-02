@@ -4,13 +4,42 @@
     <meta charset="UTF-8">
     <meta name = "viewport" content = "width=device-width, initial scale = 1.0">
     <title> AT&T 5G Network Test</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script>
+    $(function(){
+        window.setInterval(function(){
+            load_newest()
+        },2000)
+
+        function load_newest(){
+            $.ajax({
+                url:"/update_recent",
+                type: "POST",
+                dataType: "json",
+                success: function(data){
+                    $(new_fetch).replaceWith(data)
+                }
+
+            })
+        }
+    })
+    </script>
 </head>
 <body>
     <h1> AT&T 5G Network Test</h1>
     <form action="/runTest/" method="post">
         {% for message in get_flashed_messages() %}
-            <p> {{message}} </p>
+            <h1> {{message}} </h1>
         {% endfor %}
+            
+        <div id = 'new_fetch'>
+            <h3> Previous Test Call Result </h3>
+            <p>Upload Speed: {{upload}}</p>
+            <p>Download Speed: {{download}}</p>
+            <p>Longitude: {{longitude}}</p>
+            <p>Latitude: {{latitude}}</p>
+            <p>Altitude: {{altitude}}</p>
+        </div>
 
         <button name="startBtn" type="submit">Start</button>
     </form>
@@ -19,9 +48,9 @@
         <button name="startBtn" type="submit">Stop</button>
     </form>
 
-    <form action="/MLmodel/" method="post"></form>
-        <button name ="navigateML" type = "submit">
-            <a href = "{{url_for('MLmodel')}}">
+    <form action="/mlmodel/" method="post"></form>
+        <button name ="navigateML" type = "submit" >
+            <a href = "{{url_for('mlmodel')}}">
             Here to visualize a prediction on a 5G network performance
             </a>
         </button>

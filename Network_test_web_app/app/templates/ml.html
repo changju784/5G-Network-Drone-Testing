@@ -19,6 +19,23 @@
     <!-- <form action="/stopTest/" method="post">
         <button name="startBtn" type="submit">Stop</button>
     </form> -->
+    <form action = "/mlmodel/build" method = 'post'>
+        {% for message in get_flashed_messages() %}
+            <h2> {{message}} </h2>
+        {% endfor %}
+        <button type = "submit"> Train the model with new dataset</button>
+    </form>
+    <form action = "/mlmodel/predict" method = 'post'>
+        <p> Longitude </p>
+        <input name = "longitude"> 
+        <p> Latitude</p>
+        <input name = "latitude" >
+        <p> Altitude</p>
+        <input name = "altitude">
+        
+        <button type = "submit"> Predict </button>
+    </form>
+    
 
 </body>
 </html>
