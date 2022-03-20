@@ -32,6 +32,7 @@ class Modeling:
     def train(self):
         total_data = dataset.get_data()
         total_data = total_data.drop(columns=['id', 'time_stamp'])
+        # total_data = total_data.drop(columns=['id'])
         X = total_data[['latitude', 'longtitude', 'altitude']]
         y = total_data[['upload', 'download']]
         # print(X.head())

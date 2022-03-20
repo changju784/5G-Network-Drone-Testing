@@ -49,7 +49,8 @@ class Database():
             doc.get('latitude'), \
             doc.get('longitude'), \
             doc.get('altitude'), \
-            doc.get('time_stamp')))
+            doc.get('time_stamp')
+            ))
             
         return result
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, jsonify, request
+from flask import Flask, redirect, render_template, flash, jsonify, request, url_for
 import os
 import sys
 
@@ -33,6 +33,16 @@ def start():
         latitude = database.latitude,
         altitude = database.altitude)
 
+# @app.route("/running/", methods=['POST','GET'])
+# def running():
+#     database.db.collection('operations').document('operate').set({'test': True})
+#     flash("Test Running")
+
+#     doc_ref = database.db.collection('operations').document('newest')
+#     doc_watch = doc_ref.on_snapshot(database.on_snapshot)
+
+#     return render_template('running.html')
+
 @app.route("/stopTest/", methods = ['POST'])
 def stop():
     database.db.collection('operations').document('operate').set({'test':False})
@@ -47,6 +57,12 @@ def update_recent():
         longitude= database.longitude,
         latitude = database.latitude,
         altitude = database.altitude))
+    # return jsonify('',render_template('running.html', \
+    #     upload = database.upload,
+    #     download = database.download,
+    #     longitude= database.longitude,
+    #     latitude = database.latitude,
+    #     altitude = database.altitude))
 
 
 @app.route("/mlmodel")
@@ -69,16 +85,25 @@ def predict():
     except:
         flash("please enter all the input fields correctly")
         return render_template("ml.html")
-        
+
     prediction = ml.predict(longitude,latitude,altitude)
     try:
         prediction = ml.predict(longitude,latitude,altitude)
     except:
-        flash("Please train the model before prediction")
+        flash("Please train the model at least once before prediction")
         return render_template("ml.html")
 
     flash("The predictions is : " + "  ".join(prediction) )
     return render_template("ml.html")
+    # return render_template("googleMap.html")
+
+@app.route("/mlmodel/map", methods = ['POST','GET'])
+def googleMap():
+    if request.method == 'POST':
+        return render_template("googleMap.html")
+    elif request.method == 'GET':
+        return redirect(url_for('ml'))
+
     
 
 

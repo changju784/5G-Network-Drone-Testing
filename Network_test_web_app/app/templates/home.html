@@ -22,6 +22,17 @@
 
             })
         }
+        // function load_newest(){
+        //     $.ajax({
+        //         url:"/running",
+        //         type: "POST",
+        //         dataType: "json",
+        //         success: function(data){
+        //             $(map).replaceWith(data)
+        //         }
+
+        //     })
+        // }
     })
     </script>
 </head>
@@ -43,6 +54,8 @@
 
         <button name="startBtn" type="submit">Start</button>
     </form>
+
+
 
     <form action="/stopTest/" method="post">
         <button name="startBtn" type="submit">Stop</button>

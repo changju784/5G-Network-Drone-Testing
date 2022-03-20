@@ -194,8 +194,11 @@ class MainActivity : AppCompatActivity() {
                         longitude = location.longitude
                         altitude = location.altitude
                         Toast.makeText(this,"Longitude: "+longitude.toString()
-                            + "\n Latitude: "+ latitude.toString()
-                                + "\n Altitude: " + altitude.toString(),Toast.LENGTH_LONG).show()
+                            + "\n Latitude: "+ latitude.toString(), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this,"Altitude: "+ altitude.toString(), Toast.LENGTH_LONG).show()
+//                        Toast.makeText(this,longitude.toString()
+//                                + "\n" + latitude.toString()
+//                                + "\n"+ altitude.toString(),Toast.LENGTH_LONG).show()
                     }
                 }
             }

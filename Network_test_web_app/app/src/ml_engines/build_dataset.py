@@ -30,4 +30,5 @@ class BuildData:
 
         df = pd.DataFrame(result)
         df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude','altitude', 'time_stamp']
+        # df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude','altitude']
         return df
