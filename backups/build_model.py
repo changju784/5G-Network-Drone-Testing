@@ -16,7 +16,7 @@ __all__ = ['build_model']
 
 def model_regression(X, y, train_len):
     # path = cpath.path
-    path = "dataset/sample_train_data.csv"
+    path = "../ml_engines/dataset/sample_train_data.csv"
     model = keras.Sequential([
         layers.Dense(64, activation='relu', input_shape=[train_len]),
         layers.Dense(32, activation='relu'),

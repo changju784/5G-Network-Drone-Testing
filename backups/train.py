@@ -29,7 +29,7 @@ def train():
     '''
     # Data preprocessing
     # path = cpath.path
-    path = "dataset/sample_train_data.csv"
+    path = "../ml_engines/dataset/sample_train_data.csv"
     fn = open(path, 'rt', encoding='ISO-8859-1')
     total_data = pd.read_csv(fn)
     total_data = total_data.drop(columns=['country', 'country_code', 'date'])

@@ -41,9 +41,9 @@ class BuildData:
             doc.get('upload'), \
             doc.get('latitude'), \
             doc.get('longitude'), \
-            doc.get('altitude'), \
-            doc.get('time_stamp')))
+            doc.get('altitude')))
+            # doc.get('time_stamp')))
 
         df = pd.DataFrame(result)
-        df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude','altitude', 'time_stamp']
+        df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude','altitude']
         return df
