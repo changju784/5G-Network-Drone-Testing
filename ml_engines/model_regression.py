@@ -31,7 +31,7 @@ class Modeling:
         total_data = total_data.drop(columns=['id'])
         X = total_data[['latitude', 'longtitude', 'altitude']]
         y = total_data[['upload', 'download']]
-        print(X.head())
+        
         x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
         x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
         y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
