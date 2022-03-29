@@ -86,7 +86,6 @@ def predict():
         flash("please enter all the input fields correctly")
         return render_template("ml.html")
 
-    prediction = ml.predict(longitude,latitude,altitude)
     try:
         prediction = ml.predict(longitude,latitude,altitude)
     except:
