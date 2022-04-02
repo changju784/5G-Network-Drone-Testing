@@ -34,7 +34,15 @@ class Modeling:
         # total_data = dataset.get_data()
         fn = open(path, 'rt', encoding='ISO-8859-1')
         total_data = pd.read_csv(fn)
-        total_data = total_data.drop(columns=['id', 'time_stamp'])
+        total_data = total_data.drop(columns=['id'])
+        for ts in total_data['time_stamp']:
+            ts_split = ts.split(' ')
+            date = ts_split[1].split(':')
+            if 5 < int(date[0]) or 18  < int(date[0]):
+                total_data.replace(ts, "DAY")
+            else:
+                total_data.replace(ts, "NIGHT")
+
         print("Total network speed test conducted: ", len(total_data.index))
         print("Average altitudes(ft): ", round(total_data['altitude'].mean(), 4))
         print("Average upload speed(Mbps): ", round(total_data['upload'].mean() / 1000, 4))
@@ -69,7 +77,7 @@ class Modeling:
         path = cpath.path['train_data_path']
         fn = open(path, 'rt', encoding='ISO-8859-1')
         df = pd.read_csv(fn)
-        df = df.drop(columns=['id', 'time_stamp'])
+        df = df.drop(columns=['id'])
 
         # Data pre-processing
         df.dropna()
