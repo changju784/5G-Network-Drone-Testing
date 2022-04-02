@@ -74,21 +74,21 @@ class Modeling:
         # Data pre-processing
         df.dropna()
         df = df[(df['upload'] > 0) & (df['download'] > 0)]
+        print(df.head)
 
+        X = df[['latitude', 'longtitude', 'altitude']]
+        y = df[['upload', 'download']]
+        x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
+        x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
+        y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
+        self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
 
-        # X = df[['latitude', 'longtitude', 'altitude']]
-        # y = df[['upload', 'download']]
-        # x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
-        # x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
-        # y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
-        # self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
+        sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
+        print("Sample predicdtion for latitude: ", 42.350872, " longtitude: ", -71.125286, " altitude: ", -8.944273)
+        print("Upload speed: ", round(sample_predict[0][0], 2), "Download speed: ", round(sample_predict[0][1], 2))
 
-        # sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
-        # print("Sample predicdtion for latitude: ", 42.350872, " longtitude: ", -71.125286, " altitude: ", -8.944273)
-        # print("Upload speed: ", round(sample_predict[0][0], 2), "Download speed: ", round(sample_predict[0][1], 2))
-        #
-        # accuracy = self.clf.score(x_test, y_test)
-        # print("Model Acurracy: ", round(accuracy, 2))
+        accuracy = self.clf.score(x_test, y_test)
+        print("Model Acurracy: ", round(accuracy, 2))
 
         # y_predict = self.clf.predict(x_test)
         # return round(accuracy,2) * 100
@@ -105,3 +105,13 @@ class Modeling:
         prediction = self.clf.predict([[lon, lat , alt]])
         return [str(prediction[0][0]), str(prediction[0][1])]
 
+    # def train(self):
+    #     # Get dataset
+    #     path = cpath.path['train_data_path']
+    #     fn = open(path, 'rt', encoding='ISO-8859-1')
+    #     df = pd.read_csv(fn)
+    #     df = df.drop(columns=['id', 'time_stamp'])
+    #
+    #     # Data pre-processing
+    #     df.dropna()
+    #     df = df[(df['upload'] > 0) & (df['download'] > 0)]
