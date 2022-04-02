@@ -12,6 +12,13 @@ from sklearn.linear_model import LinearRegression, Ridge
 import matplotlib.pyplot as plt
 from ml_engines.build_dataset import BuildData
 
+## KNN test##
+from sklearn.preprocessing import MinMaxScaler
+from sklearn import neighbors
+from sklearn.metrics import mean_squared_error 
+from math import sqrt
+## end KNN ##
+
 __all__ = ['model_regression']
 dataset = BuildData.instance()
 
@@ -85,20 +92,56 @@ class Modeling:
         df.dropna()
         df = df[(df['upload'] > 0) & (df['download'] > 0)]
 
+        new_ts = []
+        for ts in df['time_stamp']:
+            ts_split = ts.split(' ')
+            date = ts_split[1].split(':')
+            if 5 < int(date[0]) or 18  < int(date[0]):
+               new_ts.append(0)
+            else:
+                new_ts.append(1)
+        df.loc[:, 'time_stamp'] = new_ts
 
-        # X = df[['latitude', 'longtitude', 'altitude']]
-        # y = df[['upload', 'download']]
-        # x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
-        # x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
-        # y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
+
+        X = df[['latitude', 'longtitude', 'altitude', 'time_stamp']]
+        y = df[['upload', 'download']]
+        x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
+        x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
+        y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
+
+        ## KNN test ##
+        ## Scaling ##
+        scaler = MinMaxScaler(feature_range=(0, 1))
+
+        x_train_scaled = scaler.fit_transform(x_train)
+        x_train = pd.DataFrame(x_train_scaled)
+
+        x_test_scaled = scaler.fit_transform(x_test)
+        x_test = pd.DataFrame(x_test_scaled)
+
+        ## Model ##
+        rmse_val = [] #to store rmse values for different k
+        for K in range(10):
+            K = K+1
+            model = neighbors.KNeighborsRegressor(n_neighbors = K)
+
+            model.fit(x_train, y_train)  #fit the model
+            pred=model.predict(x_test) #make prediction on test set
+            error = sqrt(mean_squared_error(y_test,pred)) #calculate rmse
+            rmse_val.append(error) #store rmse values
+            print('RMSE value for k= ' , K , 'is:', error)
+
+        ## 
+        min_error = min(rmse_val)
+
         # self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
 
         # sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
         # print("Sample predicdtion for latitude: ", 42.350872, " longtitude: ", -71.125286, " altitude: ", -8.944273)
         # print("Upload speed: ", round(sample_predict[0][0], 2), "Download speed: ", round(sample_predict[0][1], 2))
-        #
-        # accuracy = self.clf.score(x_test, y_test)
-        # print("Model Acurracy: ", round(accuracy, 2))
+        
+        accuracy = self.clf.score(x_test, y_test)
+        print("Model Acurracy: ", round(accuracy, 2))
 
         # y_predict = self.clf.predict(x_test)
         # return round(accuracy,2) * 100
