@@ -35,13 +35,15 @@ class Modeling:
         fn = open(path, 'rt', encoding='ISO-8859-1')
         total_data = pd.read_csv(fn)
         total_data = total_data.drop(columns=['id'])
+        new_ts = []
         for ts in total_data['time_stamp']:
             ts_split = ts.split(' ')
             date = ts_split[1].split(':')
             if 5 < int(date[0]) or 18  < int(date[0]):
-                total_data.replace(ts, "DAY")
+               new_ts.append("DAY")
             else:
-                total_data.replace(ts, "NIGHT")
+                new_ts.append("NIGHT")
+        total_data.loc[:, 'time_stamp'] = new_ts
 
         print("Total network speed test conducted: ", len(total_data.index))
         print("Average altitudes(ft): ", round(total_data['altitude'].mean(), 4))
