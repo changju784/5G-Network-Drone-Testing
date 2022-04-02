@@ -4,8 +4,6 @@ Linear regression
 from sklearn.datasets import make_regression
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.neighbors import KNeighborsRegressor
 import numpy as np
 import const.const_path as cpath
 import pandas as pd
@@ -36,17 +34,7 @@ class Modeling:
         # total_data = dataset.get_data()
         fn = open(path, 'rt', encoding='ISO-8859-1')
         total_data = pd.read_csv(fn)
-        total_data = total_data.drop(columns=['id'])
-        new_ts = []
-        for ts in total_data['time_stamp']:
-            ts_split = ts.split(' ')
-            date = ts_split[1].split(':')
-            if 5 < int(date[0]) or 18 < int(date[0]): # Day: 0 Night: 1
-                new_ts.append(0)
-            else:
-                new_ts.append(1)
-        total_data.loc[:, 'time_stamp'] = new_ts
-        print(total_data.head())
+        total_data = total_data.drop(columns=['id', 'time_stamp'])
         print("Total network speed test conducted: ", len(total_data.index))
         print("Average altitudes(ft): ", round(total_data['altitude'].mean(), 4))
         print("Average upload speed(Mbps): ", round(total_data['upload'].mean() / 1000, 4))
@@ -81,36 +69,27 @@ class Modeling:
         path = cpath.path['train_data_path']
         fn = open(path, 'rt', encoding='ISO-8859-1')
         df = pd.read_csv(fn)
-        df = df.drop(columns=['id'])
+        df = df.drop(columns=['id', 'time_stamp'])
 
         # Data pre-processing
         df.dropna()
         df = df[(df['upload'] > 0) & (df['download'] > 0)]
-        new_ts = []
-        for ts in df['time_stamp']:
-            ts_split = ts.split(' ')
-            date = ts_split[1].split(':')
-            if 5 < int(date[0]) or 18 < int(date[0]): # Day: 0 Night: 1
-                new_ts.append(0)
-            else:
-                new_ts.append(1)
-        df.loc[:, 'time_stamp'] = new_ts
-        X = df[['latitude', 'longtitude', 'altitude', 'time_stamp']]
-        y = df[['upload', 'download']]
-        x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
-        x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
-        y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
 
 
-        self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
-        accuracy = self.clf.score(x_test, y_test)
-        print("Model Acurracy: ", round(accuracy, 2))
-
-
+        # X = df[['latitude', 'longtitude', 'altitude']]
+        # y = df[['upload', 'download']]
+        # x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
+        # x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
+        # y_train, y_test = y_train.to_numpy(), y_test.to_numpy()
+        # self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
 
         # sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
         # print("Sample predicdtion for latitude: ", 42.350872, " longtitude: ", -71.125286, " altitude: ", -8.944273)
         # print("Upload speed: ", round(sample_predict[0][0], 2), "Download speed: ", round(sample_predict[0][1], 2))
+        #
+        # accuracy = self.clf.score(x_test, y_test)
+        # print("Model Acurracy: ", round(accuracy, 2))
+
         # y_predict = self.clf.predict(x_test)
         # return round(accuracy,2) * 100
         # plt.scatter(y_test, y_predict, alpha=0.4, label="Model Accuracy:%.2f" % accuracy)
@@ -125,5 +104,4 @@ class Modeling:
         # print(self.clf)
         prediction = self.clf.predict([[lon, lat , alt]])
         return [str(prediction[0][0]), str(prediction[0][1])]
-
 
