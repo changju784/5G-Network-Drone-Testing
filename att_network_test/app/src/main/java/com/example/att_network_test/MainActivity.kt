@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private val db = Firebase.firestore
+    private var galt = 0
+    private var getground: Boolean? = true
 
 
 
@@ -86,12 +88,16 @@ class MainActivity : AppCompatActivity() {
 
         fun run() {
             //Call your function here
+            if(getground){
+                gAlt = getGroundAltitude()
+                getground = false
+            }
             suspend fun runShortTest() = coroutineScope {
                 startActivityWith(shortTest)
             }
 
             suspend fun getResult() = coroutineScope {
-                getCurrentLocation()
+                getCurrentLocation(gAlt)
             }
 
             val first = GlobalScope.launch(Dispatchers.Default) {
@@ -181,7 +187,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getCurrentLocation(){
+    private fun getGroundAltitude(){
+        if (checkPermission()){
+            if (isLocationEnabled()){
+                fusedLocationProviderClient.lastLocation.addOnCompleteListener(this){task->
+                    val location:Location?= task.result
+                    if (location == null){
+                        Toast.makeText(this,"NULL Received",Toast.LENGTH_SHORT).show()
+                    }
+                    else{
+                        gAltitude = location.altitude
+                        return gAltitude
+                    }
+    }
+
+    private fun getCurrentLocation(groundAltitude: Double){
         if (checkPermission()){
             if (isLocationEnabled()){
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(this){task->
@@ -193,6 +213,7 @@ class MainActivity : AppCompatActivity() {
                         latitude = location.latitude
                         longitude = location.longitude
                         altitude = location.altitude
+                        altitude = altitude - groundAltitude
                         Toast.makeText(this,"Longitude: "+longitude.toString()
                             + "\n Latitude: "+ latitude.toString(), Toast.LENGTH_LONG).show()
                         Toast.makeText(this,"Altitude: "+ altitude.toString(), Toast.LENGTH_LONG).show()
