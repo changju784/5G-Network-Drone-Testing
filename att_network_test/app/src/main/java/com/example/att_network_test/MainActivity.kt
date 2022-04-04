@@ -43,10 +43,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private val db = Firebase.firestore
-    private var galt = 0
-    private var getground: Boolean? = true
-
-
 
     companion object {
         // Use the key provided to you instead of the test key below
@@ -86,18 +82,14 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        fun run() {
+        fun run(groundAlt: Double) {
             //Call your function here
-            if(getground){
-                gAlt = getGroundAltitude()
-                getground = false
-            }
             suspend fun runShortTest() = coroutineScope {
                 startActivityWith(shortTest)
             }
 
             suspend fun getResult() = coroutineScope {
-                getCurrentLocation(gAlt)
+                getCurrentLocation(groundAlt)
             }
 
             val first = GlobalScope.launch(Dispatchers.Default) {
@@ -121,11 +113,11 @@ class MainActivity : AppCompatActivity() {
             job = null
         }
 
-        fun startUpdates() {
+        fun startUpdates(gAlt: Double) {
             stopUpdates()
             job = scope.launch{
                 while(true){
-                    run()
+                    run(gAlt)
                     delay(20000)
                 }
             }
@@ -157,7 +149,8 @@ class MainActivity : AppCompatActivity() {
 
 
         startTest.setOnClickListener { _ ->
-            startUpdates()
+            val groundAltitude = getGroundAltitude()
+            startUpdates(groundAltitude)
             Toast.makeText(this,"Start the Auto Test Run",Toast.LENGTH_LONG).show()
         }
 
