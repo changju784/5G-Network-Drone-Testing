@@ -10,10 +10,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge
 # import matplotlib.pyplot as plt
 from src.ml_engines.build_dataset import BuildData
+from src.map import Map
 
 __all__ = ['model_regression']
 
 dataset = BuildData.instance()
+map = Map.instance()
 
 class Modeling:
     # @classmethod
@@ -31,6 +33,7 @@ class Modeling:
 
     def train(self):
         total_data = dataset.get_data()
+        print(map.visualize(total_data))
         total_data = total_data.drop(columns=['id', 'time_stamp'])
         # total_data = total_data.drop(columns=['id'])
         X = total_data[['latitude', 'longtitude', 'altitude']]
