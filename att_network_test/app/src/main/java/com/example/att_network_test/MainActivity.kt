@@ -44,8 +44,6 @@ class MainActivity : AppCompatActivity() {
 
     private val db = Firebase.firestore
 
-
-
     companion object {
         // Use the key provided to you instead of the test key below
         const val SPEEDTEST_SDK_API_KEY = "o7htwvpp3tycrei1"
@@ -84,14 +82,14 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        fun run() {
+        fun run(groundAlt: Double) {
             //Call your function here
             suspend fun runShortTest() = coroutineScope {
                 startActivityWith(shortTest)
             }
 
             suspend fun getResult() = coroutineScope {
-                getCurrentLocation()
+                getCurrentLocation(groundAlt)
             }
 
             val first = GlobalScope.launch(Dispatchers.Default) {
@@ -115,11 +113,11 @@ class MainActivity : AppCompatActivity() {
             job = null
         }
 
-        fun startUpdates() {
+        fun startUpdates(gAlt: Double) {
             stopUpdates()
             job = scope.launch{
                 while(true){
-                    run()
+                    run(gAlt)
                     delay(20000)
                 }
             }
@@ -151,7 +149,8 @@ class MainActivity : AppCompatActivity() {
 
 
         startTest.setOnClickListener { _ ->
-            startUpdates()
+            val groundAltitude = getGroundAltitude()
+            startUpdates(groundAltitude)
             Toast.makeText(this,"Start the Auto Test Run",Toast.LENGTH_LONG).show()
         }
 
@@ -181,7 +180,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getCurrentLocation(){
+    private fun getGroundAltitude(){
+        if (checkPermission()){
+            if (isLocationEnabled()){
+                fusedLocationProviderClient.lastLocation.addOnCompleteListener(this){task->
+                    val location:Location?= task.result
+                    if (location == null){
+                        Toast.makeText(this,"NULL Received",Toast.LENGTH_SHORT).show()
+                    }
+                    else{
+                        gAltitude = location.altitude
+                        return gAltitude
+                    }
+    }
+
+    private fun getCurrentLocation(groundAltitude: Double){
         if (checkPermission()){
             if (isLocationEnabled()){
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(this){task->
@@ -193,6 +206,7 @@ class MainActivity : AppCompatActivity() {
                         latitude = location.latitude
                         longitude = location.longitude
                         altitude = location.altitude
+                        altitude = altitude - groundAltitude
                         Toast.makeText(this,"Longitude: "+longitude.toString()
                             + "\n Latitude: "+ latitude.toString(), Toast.LENGTH_LONG).show()
                         Toast.makeText(this,"Altitude: "+ altitude.toString(), Toast.LENGTH_LONG).show()

@@ -1,3 +1,4 @@
+import json
 from flask import Flask, redirect, render_template, flash, jsonify, request, url_for
 import os
 import sys
@@ -33,15 +34,7 @@ def start():
         latitude = database.latitude,
         altitude = database.altitude)
 
-# @app.route("/running/", methods=['POST','GET'])
-# def running():
-#     database.db.collection('operations').document('operate').set({'test': True})
-#     flash("Test Running")
 
-#     doc_ref = database.db.collection('operations').document('newest')
-#     doc_watch = doc_ref.on_snapshot(database.on_snapshot)
-
-#     return render_template('running.html')
 
 @app.route("/stopTest/", methods = ['POST'])
 def stop():
@@ -57,51 +50,46 @@ def update_recent():
         longitude= database.longitude,
         latitude = database.latitude,
         altitude = database.altitude))
-    # return jsonify('',render_template('running.html', \
-    #     upload = database.upload,
-    #     download = database.download,
-    #     longitude= database.longitude,
-    #     latitude = database.latitude,
-    #     altitude = database.altitude))
 
 
-@app.route("/mlmodel")
+
+@app.route("/mlmodel", methods = ['POST','GET'])
 def mlmodel():
     return render_template("ml.html")
 
 @app.route("/mlmodel/build", methods = ['POST'])
 def build_and_train():
     accuracy = ml.train()
-    flash("The model accuracy is " + str(accuracy))
-    return render_template("ml.html")
+    print(accuracy)
+    return render_template("train_result.html", accuracy = accuracy)
 
-@app.route("/mlmodel/predict", methods = ['POST'])
+@app.route("/mlmodel/predict", methods = ['POST','GET'])
 def predict():
-    #function predict should take input from the user
+    output = request.get_json()
+    result = json.loads(output) 
+    # function predict should take input from the user
+    alt = result["altitude"]
+    lat = result["latitude"]
+    lng = result["longitude"]
     try:
-        longitude = float(request.form["longitude"])
-        latitude = float(request.form["latitude"])
-        altitude = float(request.form["altitude"])
+        longitude = float(lng)
+        latitude = float(lat)
+        altitude = float(alt)
     except:
-        flash("please enter all the input fields correctly")
-        return render_template("ml.html")
-
+        msg = "please enter all the input fields correctly"
+        return render_template("errorMessage.html", message = msg)
     try:
         prediction = ml.predict(longitude,latitude,altitude)
     except:
-        flash("Please train the model at least once before prediction")
-        return render_template("ml.html")
+        msg = "Please train the model at least once before prediction"
+        return render_template("errorMessage.html", message=msg)
+    return render_template("prediction.html", upload=prediction[0], download=prediction[1])
 
-    flash("The predictions is : " + "  ".join(prediction) )
-    return render_template("ml.html")
-    # return render_template("googleMap.html")
 
-@app.route("/mlmodel/map", methods = ['POST','GET'])
-def googleMap():
-    if request.method == 'POST':
-        return render_template("googleMap.html")
-    elif request.method == 'GET':
-        return redirect(url_for('ml'))
+
+@app.route("/mlmodel/maphistory", methods = ['POST'])
+def map_history():
+    return render_template('map_history.html')
 
     
 
