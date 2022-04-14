@@ -88,7 +88,7 @@ class Modeling:
         path = cpath.path['train_data_path']
         fn = open(path, 'rt', encoding='ISO-8859-1')
         df = pd.read_csv(fn)
-        df = df.drop(columns=['id', 'time_stamp', 'latitude', 'longtitude'])
+        df = df.drop(columns=['id', 'time_stamp'])
 
         # Data pre-processing
         df.dropna()
@@ -97,6 +97,7 @@ class Modeling:
         df = df[(df['upload'] > 25) & (df['download'] > 25) & (df['altitude'] > -50) & (df['zipcode'] != '0')] # Drop unnecessary data
         indexes = df[(df['upload'] < 40) & (df['download'] < 50) & (df['altitude'] < 50)].index
         df.drop(indexes, inplace=True)
+
         for index, row in df.iterrows():
             zipcode = row['zipcode'][:5]
             if len(row['zipcode']) > 5:
@@ -128,7 +129,7 @@ class Modeling:
                     df.loc[index, 'download'] = avg_downloads[4]
         df = pd.concat(dflist)
 
-        X = df[['zipcode', 'altitude']]
+        X = df[['longtitude', 'latitude', 'altitude']]
         y = df[['upload', 'download']]
         x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
         x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
@@ -137,10 +138,12 @@ class Modeling:
         # Multi-out regression model
         self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
 
-        # sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
-        # print("Sample predicdtion for latitude: ", 42.350872, " longtitude: ", -71.125286, " altitude: ", -8.944273)
-        # print("Upload speed: ", round(sample_predict[0][0], 2), "Download speed: ", round(sample_predict[0][1], 2))
+        sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
+        print("Sample predicdtion for latitude: ", 42.350872, " lontitude: ", -71.125286, " altitude: ", -8.944273)
+        print("Actual Upload speed(Mbps): ", 42, "Download speed(Mbps): ", 54)
+        print("Predicted Upload speed: ", round(sample_predict[0][0], 2), "Predicted Download speed: ", round(sample_predict[0][1], 2))
         accuracy = self.clf.score(x_test, y_test)
+        print('\n')
         print("Model Acurracy: ", round(accuracy, 2))
         #
         y_predict = self.clf.predict(x_test)
@@ -151,17 +154,17 @@ class Modeling:
         plt.legend()
         plt.show()
 
-        # ypred = self.clf.predict(x_test)
-        # print("Upload Speed MSE:%.4f" % mean_squared_error(y_test[:, 0], ypred[:, 0]))
-        # print("Download Speed MSE:%.4f" % mean_squared_error(y_test[:, 1], ypred[:, 1]))
+        ypred = self.clf.predict(x_test)
+        print("Upload Speed MSE:%.4f" % mean_squared_error(y_test[:, 0], ypred[:, 0]))
+        print("Download Speed MSE:%.4f" % mean_squared_error(y_test[:, 1], ypred[:, 1]))
         #
-        # x_ax = range(len(x_test))
-        # # plt.plot(x_ax, y_test[:, 0], label="Actual Upload Speed", color='c')
-        # # plt.plot(x_ax, ypred[:, 0], label="Predicted Upload Speed", color='b')
-        # plt.plot(x_ax, y_test[:, 1], label="Actual Download Speed", color='m')
-        # plt.plot(x_ax, ypred[:, 1], label="Predicted Download Speed", color='r')
-        # plt.legend()
-        # plt.show()
+        x_ax = range(len(x_test))
+        plt.plot(x_ax, y_test[:, 0], label="Actual Upload Speed", color='c')
+        plt.plot(x_ax, ypred[:, 0], label="Predicted Upload Speed", color='b')
+        plt.plot(x_ax, y_test[:, 1], label="Actual Download Speed", color='m')
+        plt.plot(x_ax, ypred[:, 1], label="Predicted Download Speed", color='r')
+        plt.legend()
+        plt.show()
 
         return round(accuracy, 2) * 100
 
