@@ -5,6 +5,8 @@ Linear regression
 from collections import Counter
 import time
 import numpy as np
+from sklearn.linear_model import LinearRegression
+
 import const.const_path as cpath
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -16,12 +18,10 @@ from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.model_selection import train_test_split
-
-
-## KNN test##
-from sklearn.neighbors import KNeighborsRegressor
-## end KNN ##
-
+## Plots ##
+from sklearn import linear_model
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.linear_model import LinearRegression
 __all__ = ['model_regression']
 dataset = BuildData.instance()
 
@@ -138,32 +138,52 @@ class Modeling:
         # Multi-out regression model
         self.clf = MultiOutputRegressor(GradientBoostingRegressor(random_state=0)).fit(x_train, y_train)
 
-        sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
-        print("Sample predicdtion for latitude: ", 42.350872, " lontitude: ", -71.125286, " altitude: ", -8.944273)
-        print("Actual Upload speed(Mbps): ", 42, "Download speed(Mbps): ", 54)
-        print("Predicted Upload speed: ", round(sample_predict[0][0], 2), "Predicted Download speed: ", round(sample_predict[0][1], 2))
+        # sample_predict = self.clf.predict([[42.350872, -71.125286, -8.944273]]) # upload: 30298 download: 54478
+        # print("Sample predicdtion for latitude: ", 42.350872, " lontitude: ", -71.125286, " altitude: ", -8.944273)
+        # print("Actual Upload speed(Mbps): ", 42, "Download speed(Mbps): ", 54)
+        # print("Predicted Upload speed: ", round(sample_predict[0][0], 2), "Predicted Download speed: ", round(sample_predict[0][1], 2))
         accuracy = self.clf.score(x_test, y_test)
-        print('\n')
-        print("Model Acurracy: ", round(accuracy, 2))
+        # print('\n')
+        # print("Model Acurracy: ", round(accuracy, 2))
+        # #
+        # y_predict = self.clf.predict(x_test)
+        # plt.scatter(y_test, y_predict, alpha=0.4, label="Model Accuracy:%.2f" % accuracy)
+        # plt.xlabel("Actual speed")
+        # plt.ylabel("Predicted speed")
+        # plt.title("MULTIPLE LINEAR REGRESSION")
+        # plt.legend()
+        # plt.show()
         #
-        y_predict = self.clf.predict(x_test)
-        plt.scatter(y_test, y_predict, alpha=0.4, label="Model Accuracy:%.2f" % accuracy)
-        plt.xlabel("Actual speed")
-        plt.ylabel("Predicted speed")
-        plt.title("MULTIPLE LINEAR REGRESSION")
-        plt.legend()
-        plt.show()
+        # ypred = self.clf.predict(x_test)
+        # print("Upload Speed MSE:%.4f" % mean_squared_error(y_test[:, 0], ypred[:, 0]))
+        # print("Download Speed MSE:%.4f" % mean_squared_error(y_test[:, 1], ypred[:, 1]))
+        # #
+        # x_ax = range(len(x_test))
+        # plt.plot(x_ax, y_test[:, 0], label="Actual Upload Speed", color='c')
+        # plt.plot(x_ax, ypred[:, 0], label="Predicted Upload Speed", color='b')
+        # plt.plot(x_ax, y_test[:, 1], label="Actual Download Speed", color='m')
+        # plt.plot(x_ax, ypred[:, 1], label="Predicted Download Speed", color='r')
+        # plt.legend()
+        # plt.show()
 
-        ypred = self.clf.predict(x_test)
-        print("Upload Speed MSE:%.4f" % mean_squared_error(y_test[:, 0], ypred[:, 0]))
-        print("Download Speed MSE:%.4f" % mean_squared_error(y_test[:, 1], ypred[:, 1]))
-        #
-        x_ax = range(len(x_test))
-        plt.plot(x_ax, y_test[:, 0], label="Actual Upload Speed", color='c')
-        plt.plot(x_ax, ypred[:, 0], label="Predicted Upload Speed", color='b')
-        plt.plot(x_ax, y_test[:, 1], label="Actual Download Speed", color='m')
-        plt.plot(x_ax, ypred[:, 1], label="Predicted Download Speed", color='r')
-        plt.legend()
+        # 3D plot
+        X = df[['zipcode', 'altitude']].values.reshape(-1, 2)
+        Y = df[['upload']]
+        Regressor = LinearRegression()
+        Regressor.fit(X, Y)
+        x_surf, y_surf = np.meshgrid(np.linspace(df.zipcode.min(), df.zipcode.max(), 100),
+                                     np.linspace(df.altitude.min(), df.altitude.max(), 100))
+        onlyX = pd.DataFrame({'zipcode': x_surf.ravel(), 'altitude': y_surf.ravel()})
+        fittedY = Regressor.predict(onlyX)
+        fittedY = np.array(fittedY)
+        fig = plt.figure(figsize=(20, 10))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(df['zipcode'], df['altitude'], df['upload'], c='red', marker='o', alpha=0.5)
+        ax.plot_surface(x_surf, y_surf, fittedY.reshape(x_surf.shape), color='b', alpha=0.3)
+        ax.set_xlabel('Zipcode')
+        ax.set_ylabel('Altitude')
+        ax.set_zlabel('Upload Speed')
+        plt.title("3D graph of upload speed prediction model")
         plt.show()
 
         return round(accuracy, 2) * 100
