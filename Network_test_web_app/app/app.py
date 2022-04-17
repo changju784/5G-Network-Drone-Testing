@@ -55,13 +55,15 @@ def update_recent():
 
 @app.route("/mlmodel", methods = ['POST','GET'])
 def mlmodel():
-    return render_template("ml.html")
+    accuracy = ml.load_latest_model()
+    return render_template("ml.html",accuracy = accuracy)
 
 @app.route("/mlmodel/build", methods = ['POST'])
 def build_and_train():
     accuracy = ml.train()
-    print(accuracy)
-    return render_template("train_result.html", accuracy = accuracy)
+    return render_template("train_result.html", 
+    accuracy = accuracy ,
+    source_path = "../src/ml_engines/model/output.jpg")
 
 @app.route("/mlmodel/predict", methods = ['POST','GET'])
 def predict():
@@ -90,6 +92,7 @@ def predict():
 @app.route("/mlmodel/maphistory", methods = ['POST'])
 def map_history():
     return render_template('map_history.html')
+
 
     
 

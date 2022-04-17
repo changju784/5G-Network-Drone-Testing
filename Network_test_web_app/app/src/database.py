@@ -20,12 +20,19 @@ class Database():
         self.altitude = 0.0
         self.longitude = 0.0
         self.latitude = 0.0
+        self.zipcode = ""
     
     def set_true(self):
         self.db.collection('operations').document('operate').set({'test': True})
 
     def set_false(self):
         self.db.collection('operations').document('operate').set({'test':False})
+
+    def set_zipcode(self, id, zipcode):
+        self.db.collection('data').document(id).update({'zipcode':zipcode})
+
+    def save_model(self,df):
+        self.db.collection('model').document('mlmodel').set({'test':False})
 
     def on_snapshot(self,doc_snapshot, changes, read_time):
         for doc in doc_snapshot:
@@ -34,7 +41,7 @@ class Database():
             self.longitude = doc.get("longitude")
             self.latitude = doc.get("latitude")
             self.altitude = doc.get("altitude")
-            print(self.upload, self.download)
+            self.zipcode = doc.get("zipcode")
         self.callback_done.set()
     
     def get_data(self):
@@ -49,7 +56,8 @@ class Database():
             doc.get('latitude'), \
             doc.get('longitude'), \
             doc.get('altitude'), \
-            doc.get('time_stamp')
+            doc.get('time_stamp'), \
+            doc.get('zipcode')
             ))
             
         return result
