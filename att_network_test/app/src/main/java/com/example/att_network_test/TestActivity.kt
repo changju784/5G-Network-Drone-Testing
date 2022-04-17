@@ -83,10 +83,6 @@ class TestActivity : AppCompatActivity() {
         }
 
         when (testFunctionality) {
-            TestFunctionality.SingleTest -> {
-                runSingleTest(inst)
-
-            }
             TestFunctionality.ShortTest -> {
                 runShortTest(inst)
             }
@@ -127,38 +123,38 @@ class TestActivity : AppCompatActivity() {
 
     }
 
-    private fun runSingleTest(speedtestSDK: SpeedtestSDK) {
-        val config = Config.newConfig(testConfigCITest)
-        config?.tasks = arrayListOf(Task.newThroughputTask(), Task.newServerTracerouteTask(), Task.newPacketlossTask())
-        // test against a single server
-        config?.serverIdForTesting = 6029
-        val configHandler = object : ConfigHandlerBase() {
-            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-                if (testFinished) {
-                    runFetchStoredResult(speedtestSDK)
-//                    return;
-                }
-
-                val handlerWithStageProgression =
-                    UiTestHandlerWithStageProgression(
-                        output, jsonView
-                    )
-                val handler = MainThreadTestHandler(
-                    handlerWithStageProgression
-                )
-
-                output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
-                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
-                taskManager?.start()
-            }
-
-            override fun onConfigFetchFailed(error: OoklaError) {
-                output.append("Config fetch failed with ${error.message}\n")
-            }
-        }
-
-        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-    }
+//    private fun runSingleTest(speedtestSDK: SpeedtestSDK) {
+//        val config = Config.newConfig(testConfigCITest)
+//        config?.tasks = arrayListOf(Task.newThroughputTask(), Task.newServerTracerouteTask(), Task.newPacketlossTask())
+//        // test against a single server
+//        config?.serverIdForTesting = 6029
+//        val configHandler = object : ConfigHandlerBase() {
+//            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
+//                if (testFinished) {
+//                    runFetchStoredResult(speedtestSDK)
+////                    return;
+//                }
+//
+//                val handlerWithStageProgression =
+//                    UiTestHandlerWithStageProgression(
+//                        output, jsonView
+//                    )
+//                val handler = MainThreadTestHandler(
+//                    handlerWithStageProgression
+//                )
+//
+//                output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
+//                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
+//                taskManager?.start()
+//            }
+//
+//            override fun onConfigFetchFailed(error: OoklaError) {
+//                output.append("Config fetch failed with ${error.message}\n")
+//            }
+//        }
+//
+//        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
+//    }
 
 
     private fun runShortTest(speedtestSDK: SpeedtestSDK) {
@@ -244,7 +240,8 @@ class TestActivity : AppCompatActivity() {
                 "latitude" to MainActivity.latitude,
                 "longitude" to MainActivity.longitude,
                 "altitude" to MainActivity.altitude,
-                "time_stamp" to FieldValue.serverTimestamp()
+                "time_stamp" to FieldValue.serverTimestamp(),
+                "zipcode" to ""
             )
             db.collection("data")
                 .add(data)

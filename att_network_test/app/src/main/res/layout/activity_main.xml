@@ -51,10 +51,11 @@
     <ListView
         android:id="@+id/actionList"
         android:layout_width="match_parent"
-        android:layout_height="534dp"
+        android:layout_height="500dp"
         android:layout_margin="15dp"
         android:divider="@color/cardview_dark_background"
         android:dividerHeight="1dp" />
+
 
     <Button
         android:id="@+id/startTest"

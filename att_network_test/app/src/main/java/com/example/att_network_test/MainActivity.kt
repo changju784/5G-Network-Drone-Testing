@@ -2,15 +2,20 @@ package com.example.att_network_test
 
 import android.Manifest
 import android.app.ActivityOptions
+import android.app.Service
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationManager
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.provider.Settings
 import android.support.v4.os.IResultReceiver
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
@@ -35,14 +40,19 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_test.*
 import java.lang.RuntimeException
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(){
 
     private var runTest: Boolean? = false
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+
     private val db = Firebase.firestore
+
+
 
     companion object {
         // Use the key provided to you instead of the test key below
@@ -53,6 +63,8 @@ class MainActivity : AppCompatActivity() {
         var longitude: Double?= 0.0
         var latitude: Double?=0.0
         var altitude: Double?=0.0
+        var ground_altitude: Double?=0.0
+        var connection_type: String?=""
     }
 
 
@@ -74,6 +86,7 @@ class MainActivity : AppCompatActivity() {
 
         actionList.adapter = arrayAdapter
         actionList.onItemClickListener = OnItemClickListener { _, _, position, _ ->
+            getGroundAltitude()
             getCurrentLocation()
             startActivityWith(availableTests[position])
         }
@@ -82,14 +95,14 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        fun run(groundAlt: Double) {
+        fun run() {
             //Call your function here
             suspend fun runShortTest() = coroutineScope {
                 startActivityWith(shortTest)
             }
 
             suspend fun getResult() = coroutineScope {
-                getCurrentLocation(groundAlt)
+                getCurrentLocation()
             }
 
             val first = GlobalScope.launch(Dispatchers.Default) {
@@ -113,12 +126,13 @@ class MainActivity : AppCompatActivity() {
             job = null
         }
 
-        fun startUpdates(gAlt: Double) {
+        fun startUpdates() {
             stopUpdates()
+            getGroundAltitude()
             job = scope.launch{
                 while(true){
-                    run(gAlt)
-                    delay(20000)
+                    run()
+                    delay(30000)
                 }
             }
         }
@@ -147,11 +161,9 @@ class MainActivity : AppCompatActivity() {
         listenOnOperation()
 
 
-
         startTest.setOnClickListener { _ ->
-            val groundAltitude = getGroundAltitude()
-            startUpdates(groundAltitude)
-            Toast.makeText(this,"Start the Auto Test Run",Toast.LENGTH_LONG).show()
+            startUpdates()
+            Toast.makeText(this,"Start the Auto Test Run",Toast.LENGTH_LONG).show();
         }
 
         stopTest.setOnClickListener { _ ->
@@ -180,6 +192,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun getGroundAltitude(){
         if (checkPermission()){
             if (isLocationEnabled()){
@@ -189,12 +202,23 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this,"NULL Received",Toast.LENGTH_SHORT).show()
                     }
                     else{
-                        gAltitude = location.altitude
-                        return gAltitude
+                        ground_altitude = location.altitude;
+
                     }
+                }
+            }
+            else{
+                Toast.makeText(this,"Turn on Location",Toast.LENGTH_SHORT).show()
+                val intent = Intent(Settings.ACTION_LOCALE_SETTINGS)
+                startActivity(intent)
+            }
+        }
+        else{
+            requestPermission()
+        }
     }
 
-    private fun getCurrentLocation(groundAltitude: Double){
+    private fun getCurrentLocation(){
         if (checkPermission()){
             if (isLocationEnabled()){
                 fusedLocationProviderClient.lastLocation.addOnCompleteListener(this){task->
@@ -202,17 +226,17 @@ class MainActivity : AppCompatActivity() {
                     if (location == null){
                         Toast.makeText(this,"NULL Received",Toast.LENGTH_SHORT).show()
                     }
-                    else{
+                    else {
                         latitude = location.latitude
                         longitude = location.longitude
-                        altitude = location.altitude
-                        altitude = altitude - groundAltitude
-                        Toast.makeText(this,"Longitude: "+longitude.toString()
-                            + "\n Latitude: "+ latitude.toString(), Toast.LENGTH_LONG).show()
-                        Toast.makeText(this,"Altitude: "+ altitude.toString(), Toast.LENGTH_LONG).show()
-//                        Toast.makeText(this,longitude.toString()
-//                                + "\n" + latitude.toString()
-//                                + "\n"+ altitude.toString(),Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this, "Longitude: " + longitude.toString()
+                                    + "\n Latitude: " + latitude.toString(), Toast.LENGTH_LONG
+                        ).show()
+                        altitude = location.altitude - ground_altitude!!
+
+                        Toast.makeText(this, "Altitude: " + altitude.toString() + " m", Toast.LENGTH_LONG)
+                            .show();
                     }
                 }
             }
@@ -258,6 +282,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+//    private fun mGetNetworkClass(context: Context): String? {
+//
+//        // ConnectionManager instance
+//        val mConnectivityManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+//        val mInfo = mConnectivityManager.activeNetworkInfo
+//
+//        // If not connected, "-" will be displayed
+//        if (mInfo == null || !mInfo.isConnected) return "-"
+//
+//        // If Connected to Wifi
+//        if (mInfo.type == ConnectivityManager.TYPE_WIFI) return "WIFI"
+//
+//        // If Connected to Mobile
+//        if (mInfo.type == ConnectivityManager.TYPE_MOBILE) {
+//            return when (mInfo.subtype) {
+//                TelephonyManager.NETWORK_TYPE_NR -> "5G"
+//                else -> "?"
+//            }
+//        }
+//        return "?"
+//    }
 
 
     private fun isLocationEnabled():Boolean{
