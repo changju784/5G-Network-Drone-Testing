@@ -113,7 +113,7 @@ class Modeling:
         self.df = dataset.get_data()
 
         # df = self.df.copy()
-
+        df = self.df.copy()
         map.visualize(df)
 
         df = self.preprocess(df)
