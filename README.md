@@ -7,33 +7,32 @@ This is a research project exploring the feasibility of autonomous unmanned aeri
 The issue is that network infrastructure, such as 5G, is primarily designed to serve ground level or near ground level users, not UAVs that could be flying up to 400 feet above the ground. The project sponsor is AT&T Labs and they are interested in expanding their understanding of how 5G networks perform in the air to eventually determine if current networks are adequate for future UAV operations.
 
 
-## Visions and Goals of the Project
+## Goals and Deliverables of the Project
 
-Our machine learning model will be used to model 5G network performance for use with commercial drone fleets. High level goals of this project include:
+The overall vision of this project is to use machine learning to model 5G network performance up to 400 feet above the ground. Specific deliverables include:
 
-  - Developing a ML model in Python to predict network performance at different altitudes based on network performance on the ground
-  - Using the ML model to build a 3D map of AT&T's 5G network (network performance based on GPS coordinates (2 dimensions) + altitude (3rd dimension)
+  - Software to automatically run network speed tests and save the results (measure network upload and download speeds)
+  - Machine learning model of upload and download speed up to 400 feet above the ground
 
 ## Users and Personas of this Project
 
-The main beneficiaries of our project are AT&T, who will be able to learn more about the performance of their network in the air to measure the feasibility of deploying a commercial drone fleet connected to AT&T's network.
+The main audience of the project is the project sponsor AT&T, who will be able to learn more about the performance of their network in the air to be better informed of the feasibility of deploying a commercial drone fleet connected to a 5G cellular network.
 
-Additionally any company that doesn't have the ability to implement their own satellite network will be able to use our models to show weather it makes sense to deploy a drone fleet connected to a major ISP's 5G network.
+However, this project is a modular framework for data collection and modeling. Essentially any other organization can also use the project to conduct their own modeling of network performance at whatever locations and installations they desire.
 
 ## Scope and Features of the Project
 
-  Collect data used to model 5G network performance:
+  Hardware:
   
-  - Build hardware for data collection
-    - Sensors + processor
-    - Install hardware on a drone
-  - Store data in cloud database
+  - Quadcopter drone 
+  - 5G Android phone
   
-  Build machine learning model to model 5G performance with drones
+  Software:
   
-  - Predict air performance based on ground performance
-  - Predict ground performance based on air performance
-  - Use GPS coordinates to build 3D map of network
+  - Data collection Android application
+  - Database to store collected data
+  - Machine learning model
+  - Web application to control data collection, visualize data, and interact with model
  
 ## Solution Concept
 
