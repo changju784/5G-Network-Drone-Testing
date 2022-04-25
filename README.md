@@ -51,6 +51,9 @@ Key Design Decisions and Implementations:
   - Database use: multiple options, decided on Google Firebase Firestore
   - ML model implementation: Python sklearn multi-out regression
 
+
+It is important to emphasize that the current state of the project is more of a framework for modeling network performance in the air rather than a model that is generalizable over a wide geographic area or a comprehensive 3D map of the Boston area (where data collection was conducted). This project was limited in scale due to only one drone, one team, and time. However, the products of this project can be readily scaled up to accomplish a wider scope.
+
 ## Important Miscellaneous Information
 
 1. An important component of this project is collecting data at different heights above the ground. Anyone undertaking such a task must be mindful of the large amount of overhead that comes with legally operating a drone. Once a working drone is obtained, one must thoroughly review the Federal Aviation Administration (FAA) regulations as well as any local regulations for where one is planning to fly. Important tasks to take care of are registering your drone with the FAA, marking your drone with your registration number, and taking an online test to obtain a recreational flyer certificate. Additionally, one must be aware of any airspace restrictions for where flight is planned and apply for access if necessary. Resources for these tasks are provided in the hardware README.
