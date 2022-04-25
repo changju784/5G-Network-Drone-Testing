@@ -12,7 +12,7 @@ The issue is that network infrastructure, such as 5G, is primarily designed to s
 The overall vision of this project is to use machine learning to model 5G network performance up to 400 feet above the ground. Specific deliverables include:
 
   - Software to automatically run network speed tests and save the results (measure network upload and download speeds)
-  - Machine learning model of upload and download speed up to 400 feet above the ground
+  - Machine learning model of upload and download speeds up to 400 feet above the ground
 
 ## Users and Personas of this Project
 
