@@ -34,27 +34,19 @@ However, this project is a modular framework for data collection and modeling. E
   - Machine learning model
   - Web application to control data collection, visualize data, and interact with model
  
-## Solution Concept
+## Current Project Status
 
 ![Image](system_diagram.png)
 
-**_Figure 1: Proposed solution system including hardware components for data collection and software components for database and model implementation_
+*Fig. 1. Overall system including hardware and software components for data collection, data storage, and model implementation.*
 
-Figure 1 demonstrates our initial solution proposal. It includes hardware to be installed on a drone to collect network and positioning data and then send that data to a cloud database. Currently the team consideres MySQL to be the optimal database to store our drone-collected data, as it has optimal functionality with python. The team chose python as the language to develop our ML models in, as it is the current industry standard for developing Machine Learning and A.I. solutions.
+Fig. 1 is an overview of the project. The current iteration of the project consists of installing a 5G Android phone on a drone and flying the drone to various heights above the ground to collect the data used for modeling. The phone runs a custom app that collects network upload speed, download speed, latitude, longitude, and altitude with each test run and pushes it all to a cloud database. Finally, the machine learning code takes the data from the database to carry out the modeling. Not shown in the diagram is the web app, which is for a user to interact with the model and visualize the data. It is also possible to use the web app to remotely control the data collection app on the phone and monitor test run status if a user chooses to do so.
 
-**Design Implications and Discussions**
+
+**Design Implications and Discussion**
 
 Key Design Decisions and Implementations:
 
-  - Harware suite design: Multiple options for data collection, including using a cell phone or designing our own module using RaspberryPi
-  - Database use: multiple options including MySQL, AWS, Google Firebase, Oracle
-  - ML model implementation: final decision on which data to use impacts which ML algorithm the team employs in the final product. Currently considering TensorFlow Convolutional Neural Network for classification
-
-
-## Acceptance Criteria
-
-Minimum viable product (MVP) defined as hardware to measure a drone's real time altitude and the network upload/download speed, the ability to store those data points in a cloud database, and a model to predict air performance based on ground performance with <20% training error and >80% test accuracy. 
-
-## Release Planning
-
-Final product deadline is March 31, 2022
+  - Harware suite design: multiple options for data collection, decided on 5G Android phone using an app developed with the Ookla mobile speedtest SDK
+  - Database use: multiple options, decided on Google Firebase Firestore
+  - ML model implementation: Python sklearn multi-out regression
