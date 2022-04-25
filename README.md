@@ -1,4 +1,4 @@
-## AT&T 5G Network Drone Testing  - Red Team - Project Description
+## Drone 5G Network Performance Modeling  - Red Team - Project Description
 
 ## Visions and Goals of the Project
 
