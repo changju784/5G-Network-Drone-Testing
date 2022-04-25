@@ -51,7 +51,7 @@ Key Design Decisions and Implementations:
   - Database use: multiple options, decided on Google Firebase Firestore
   - ML model implementation: Python sklearn multi-out regression
 
-It is important to emphasize that the current state of the project is more of a framework for modeling network performance in the air rather than a model that is generalizable over a wide geographic area or a comprehensive 3D map of the Boston area (where data collection was conducted). This project was limited in scale due to only one drone, one team, and time. However, the products of this project can be readily scaled up to accomplish the user's needs.
+It is important to emphasize that the current state of the project is more of a framework for modeling network performance in the air rather than a model that is generalizable over a wide geographic area or a comprehensive 3D map of the Boston area (where data collection was conducted). This project was limited in scale due to only one drone, one team, and time. However, the products of this project can be readily scaled up to accomplish a user's goal.
 
 ## Important Miscellaneous Information
 
