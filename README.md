@@ -50,3 +50,9 @@ Key Design Decisions and Implementations:
   - Harware suite design: multiple options for data collection, decided on 5G Android phone using an app developed with the Ookla mobile speedtest SDK
   - Database use: multiple options, decided on Google Firebase Firestore
   - ML model implementation: Python sklearn multi-out regression
+
+## Important Miscellaneous Information
+
+1. An important component of this project is collecting data at different heights above the ground. Anyone undertaking such a task must be mindful of the large amount of overhead that comes with legally operating a drone. Once a working drone is obtained, one must thoroughly review the Federal Aviation Administration (FAA) regulations as well as any local regulations for where one is planning to fly. Important tasks to take care of are registering your drone with the FAA, marking your drone with your registration number, and taking an online test to obtain a recreational flyer certificate. Additionally, one must be aware of any airspace restrictions for where flight is planned and apply for access if necessary. Resources for these tasks are provided in the hardware README.
+
+2. Secondly, steadily operating a drone up to hundreds of feet above the ground can be quite difficult. One of the largest challenges encountered with data collection for this project was losing control of the drone because of strong wind. As a result, it is advised that users find flight times when wind gusts are minimal. Since it is not possible to control weather conditions, users should at least be ready to handle strong winds by conducting a lot of practice flying their drone.
