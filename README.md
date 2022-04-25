@@ -20,7 +20,7 @@ The main audience of the project is the project sponsor AT&T, who will be able t
 
 However, this project is a modular framework for data collection and modeling. Essentially any other organization can also use the project to conduct their own modeling of network performance at whatever locations and installations they desire.
 
-## Scope and Features of the Project
+## Features of the Project
 
   Hardware:
   
