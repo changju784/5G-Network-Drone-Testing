@@ -36,7 +36,7 @@ However, this project is a modular framework for data collection and modeling. E
  
 ## Solution Concept
 
-![Image](solution_concept.png)
+![Image](system_diagram.png)
 
 **_Figure 1: Proposed solution system including hardware components for data collection and software components for database and model implementation_
 
