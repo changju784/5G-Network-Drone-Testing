@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity(){
 
 
     private val db = Firebase.firestore
+    private val local_db = ArrayList<Any>()
 
 
 
@@ -126,12 +127,42 @@ class MainActivity : AppCompatActivity(){
             job = null
         }
 
+        fun getNetwork(): String? {
+            return mGetNetworkClass(this)
+        }
         fun startUpdates() {
             stopUpdates()
             getGroundAltitude()
             job = scope.launch{
                 while(true){
-                    run()
+                    if (getNetwork() == "-"){
+                        val data = hashMapOf(
+                            "upload" to 0.0,
+                            "download" to 0.0,
+                            "latitude" to latitude,
+                            "longitude" to longitude,
+                            "altitude" to altitude,
+                            "time_stamp" to FieldValue.serverTimestamp(),
+                            "zipcode" to ""
+                        )
+                        local_db.add(data)
+                    }
+                    else {
+                        if (local_db.size>0){
+                            for (data in local_db){
+                                db.collection("data")
+                                    .add(data)
+                                    .addOnSuccessListener { documentReference ->
+                                        println( "DocumentSnapshot added with ID: ${documentReference.id}")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        println("Error adding document")
+                                    }
+                                local_db.clear()
+                            }
+                        }
+                        run()
+                    }
                     delay(30000)
                 }
             }
@@ -282,27 +313,28 @@ class MainActivity : AppCompatActivity(){
             }
         }
     }
-//    private fun mGetNetworkClass(context: Context): String? {
-//
-//        // ConnectionManager instance
-//        val mConnectivityManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-//        val mInfo = mConnectivityManager.activeNetworkInfo
-//
-//        // If not connected, "-" will be displayed
-//        if (mInfo == null || !mInfo.isConnected) return "-"
-//
-//        // If Connected to Wifi
-//        if (mInfo.type == ConnectivityManager.TYPE_WIFI) return "WIFI"
-//
-//        // If Connected to Mobile
-//        if (mInfo.type == ConnectivityManager.TYPE_MOBILE) {
-//            return when (mInfo.subtype) {
-//                TelephonyManager.NETWORK_TYPE_NR -> "5G"
-//                else -> "?"
-//            }
-//        }
-//        return "?"
-//    }
+
+    private fun mGetNetworkClass(context: Context): String? {
+
+        // ConnectionManager instance
+        val mConnectivityManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val mInfo = mConnectivityManager.activeNetworkInfo
+
+        // If not connected, "-" will be displayed
+        if (mInfo == null || !mInfo.isConnected) return "-"
+
+        // If Connected to Wifi
+        if (mInfo.type == ConnectivityManager.TYPE_WIFI) return "WIFI"
+
+        // If Connected to Mobile
+        if (mInfo.type == ConnectivityManager.TYPE_MOBILE) {
+            return when (mInfo.subtype) {
+                TelephonyManager.NETWORK_TYPE_NR -> "5G"
+                else -> "?"
+            }
+        }
+        return "?"
+    }
 
 
     private fun isLocationEnabled():Boolean{

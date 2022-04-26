@@ -44,12 +44,12 @@ class BuildData:
         result = db.get_data()  
 
         df = pd.DataFrame(result)
-        df.columns = ['id', 'download', 'upload', 'latitude', 'longtitude', 'altitude', 'time_stamp','zipcode']
+        df.columns = ['id', 'download', 'upload', 'latitude', 'longitude', 'altitude', 'time_stamp','zipcode']
         zipcodes = []
         for idx, row in df.iterrows():
             if row['zipcode'] == "":
                 try:
-                    zipcode = self.get_zipcode(row['latitude'], row['longtitude'])
+                    zipcode = self.get_zipcode(row['latitude'], row['longitude'])
                 except:
                     zipcode = "0"
 
@@ -63,3 +63,5 @@ class BuildData:
         self.data = df
         df.to_csv('./app/src/ml_engines/dataset/collected_data.csv', index=False)
         return df
+
+

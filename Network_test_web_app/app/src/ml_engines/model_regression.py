@@ -53,7 +53,7 @@ class Modeling:
 
         df = self.df.copy()
         df = self.preprocess(df)
-        X = df[['longtitude', 'latitude', 'altitude']]
+        X = df[['longitude', 'latitude', 'altitude']]
         y = df[['upload', 'download']]
         x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
         x_train, x_test = x_train.to_numpy(), x_test.to_numpy()
@@ -118,7 +118,7 @@ class Modeling:
 
         df = self.preprocess(df)
 
-        X = df[['longtitude', 'latitude', 'altitude']]
+        X = df[['longitude', 'latitude', 'altitude']]
         y = df[['upload', 'download']]
         x_train, x_test, y_train, y_test = train_test_split(X, y, train_size=0.8, test_size=0.2)
         x_train, x_test = x_train.to_numpy(), x_test.to_numpy()

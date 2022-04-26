@@ -18,7 +18,7 @@ class Map:
     def visualize(self,dataset):
         total_data = dataset.drop(columns=['id'])
         lat = total_data['latitude'].values.tolist()
-        lon = total_data['longtitude'].values.tolist()
+        lon = total_data['longitude'].values.tolist()
         center = [sum(lat) / len(lat), sum(lon) / len(lon)]
         gmap3 = gmplot.GoogleMapPlotter(center[0], center[1], 15, apikey=google_api)
         gmap3.scatter(lat, lon, '#000000', size=15, marker=False)

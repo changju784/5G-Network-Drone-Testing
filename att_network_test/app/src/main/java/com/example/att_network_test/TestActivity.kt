@@ -83,6 +83,9 @@ class TestActivity : AppCompatActivity() {
         }
 
         when (testFunctionality) {
+            TestFunctionality.SingleTest->{
+                runShortTest(inst)
+            }
             TestFunctionality.ShortTest -> {
                 runShortTest(inst)
             }
@@ -123,38 +126,39 @@ class TestActivity : AppCompatActivity() {
 
     }
 
-//    private fun runSingleTest(speedtestSDK: SpeedtestSDK) {
-//        val config = Config.newConfig(testConfigCITest)
-//        config?.tasks = arrayListOf(Task.newThroughputTask(), Task.newServerTracerouteTask(), Task.newPacketlossTask())
-//        // test against a single server
-//        config?.serverIdForTesting = 6029
-//        val configHandler = object : ConfigHandlerBase() {
-//            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
-//                if (testFinished) {
-//                    runFetchStoredResult(speedtestSDK)
-////                    return;
-//                }
-//
-//                val handlerWithStageProgression =
-//                    UiTestHandlerWithStageProgression(
-//                        output, jsonView
-//                    )
-//                val handler = MainThreadTestHandler(
-//                    handlerWithStageProgression
-//                )
-//
-//                output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
-//                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
-//                taskManager?.start()
-//            }
-//
-//            override fun onConfigFetchFailed(error: OoklaError) {
-//                output.append("Config fetch failed with ${error.message}\n")
-//            }
-//        }
-//
-//        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
-//    }
+    private fun runSingleTest(speedtestSDK: SpeedtestSDK) {
+        val config = Config.newConfig(testConfigCITest)
+        config?.tasks = arrayListOf(Task.newThroughputTask(), Task.newServerTracerouteTask(), Task.newPacketlossTask())
+        // test against a single server
+        config?.serverIdForTesting = 6029
+        val configHandler = object : ConfigHandlerBase() {
+            override fun onConfigFetchFinished(validatedConfig: ValidatedConfig?) {
+                if (testFinished) {
+                    runFetchStoredResult(speedtestSDK)
+//                    return;
+                }
+
+                val handlerWithStageProgression =
+                    UiTestHandlerWithStageProgression(
+                        output, jsonView
+                    )
+                val handler = MainThreadTestHandler(
+                    handlerWithStageProgression
+                )
+
+                output.text = "Config retrieved over connection type ${validatedConfig?.connectionType.toString()}\n"
+                taskManager = speedtestSDK.newTaskManager(handler, validatedConfig)
+                taskManager?.start()
+            }
+
+            override fun onConfigFetchFailed(error: OoklaError) {
+                output.append("Config fetch failed with ${error.message}\n")
+                onBackPressed()
+            }
+        }
+
+        ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
+    }
 
 
     private fun runShortTest(speedtestSDK: SpeedtestSDK) {
@@ -181,6 +185,7 @@ class TestActivity : AppCompatActivity() {
 
             override fun onConfigFetchFailed(error: OoklaError) {
                 output.append("Config fetch failed with ${error.message}\n")
+                onBackPressed()
             }
         }
         ValidatedConfig.validate(config, MainThreadConfigHandler(configHandler))
@@ -221,6 +226,11 @@ class TestActivity : AppCompatActivity() {
         override fun onDownloadFinished(taskController: TaskManagerController?, result: TransferResult) {
             super.onDownloadFinished(taskController, result)
             taskManager?.startNextStage()
+        }
+
+        override fun onTestFailed(error: OoklaError, speedtestResult: SpeedtestResult?) {
+            super.onTestFailed(error, speedtestResult)
+            onBackPressed()
         }
 
         override fun onTestFinished(speedtestResult: SpeedtestResult) {

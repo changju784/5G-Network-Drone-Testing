@@ -7,12 +7,16 @@ from src.database import Database
 from src.ml_engines.model_regression import Modeling
 
 
+
 app = Flask(__name__)
 app.secret_key = "gkfxqywlehgnsgkskeh"
 
 
 database = Database()
 ml = Modeling()
+
+
+
 
 @app.route("/")
 def index():
