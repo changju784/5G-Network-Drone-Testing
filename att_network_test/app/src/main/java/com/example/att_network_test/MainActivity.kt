@@ -57,8 +57,8 @@ class MainActivity : AppCompatActivity(){
 
     companion object {
         // Use the key provided to you instead of the test key below
-        const val SPEEDTEST_SDK_API_KEY = "o7htwvpp3tycrei1"
-        const val SPEEDTEST_SDK_RESULT_KEY = "d7x47854dtlgwi31"
+        const val SPEEDTEST_SDK_API_KEY = "###########"
+        const val SPEEDTEST_SDK_RESULT_KEY = "###########"
         var lastTestGuid: String? = null
         private const val PERMISSION_ID = 100
         var longitude: Double?= 0.0
