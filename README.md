@@ -10,6 +10,7 @@ This is a research project exploring the feasibility of autonomous unmanned aeri
 
 The issue is that network infrastructure, such as 5G, is primarily designed to serve ground level or near ground level users, not UAVs that could be flying up to 400 feet above the ground. The project sponsor is AT&T Labs and they are interested in expanding their understanding of how 5G networks perform in the air to eventually determine if current networks are adequate for future UAV operations.
 
+This README provides general starting information for the project. The finer details of everything can be found in the wiki pages.
 
 ## Goals and Deliverables of the Project
 
