@@ -1,5 +1,9 @@
 # Drone 5G Network Performance Modeling  - Sky Seer, Red Team
 
+## Software Readme - Data Collection App:
+## Software Readme - Machine Learning and Web App:
+## Hardware Readme:
+
 ## Project Motivation and Background
 
 This is a research project exploring the feasibility of autonomous unmanned aerial vehicles (UAVs) operating on cellular networks. More companies are experimenting with UAVs for automation and services, such as Amazon’s Prime Air aerial package delivery. UAV fleets would rely on telecommunications networks for connectivity and control and UAVs losing connectivity during operations could potentially be catastrophic. If a UAV were to crash there could be damage to the UAV itself, damage to its payload, damage to other property, and even injury to people in the area. This means that it is very important to ensure telecommunications networks can support future UAV operations. 
