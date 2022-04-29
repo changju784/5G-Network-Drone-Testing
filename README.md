@@ -2,7 +2,7 @@
 
 ## Software Readme - Data Collection App:
 ## Software Readme - Machine Learning and Web App:
-## Hardware Readme:
+## Hardware Readme - [wiki](https://github.com/changju784/5G-Network-Drone-Testing/wiki/Hardware#this-serves-as-a-readme-for-the-hardware-specifics-of-the-project)
 
 ## Project Motivation and Background
 
